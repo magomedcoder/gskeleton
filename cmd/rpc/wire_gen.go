@@ -9,17 +9,23 @@ package main
 import (
 	"github.com/google/wire"
 	"json-rpc-skeleton/internal/provider"
+	"json-rpc-skeleton/pkg/rpc"
 )
 
 // Injectors from wire.go:
 
 func Initialize() *Provider {
-	provider := &Provider{}
-	return provider
+	server := provider.NewRpcServer()
+	mainProvider := &Provider{
+		Server: server,
+	}
+	return mainProvider
 }
 
 // wire.go:
 
-type Provider struct{}
+type Provider struct {
+	Server *rpc.Server
+}
 
 var newSet = wire.NewSet(wire.Struct(new(Provider), "*"), provider.NewRpcServer)
