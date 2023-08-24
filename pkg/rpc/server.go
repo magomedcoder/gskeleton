@@ -29,27 +29,52 @@ func (r *Server) Register(method string, handler HandlerFunc) {
 	r.handlers[strings.ToLower(method)] = handler
 }
 
-func (r *Server) callMethod(ctx context.Context, req *RpcRequest) {
-	h, ok := r.handlers[strings.ToLower(req.Method)]
-	if !ok {
-
-	}
-	err := h(ctx, req.Params)
-	if err != nil {
-
+func ResultResponse(id any, resp json.RawMessage) *Response {
+	return &Response{
+		JsonRpc: "2.0",
+		Result:  resp,
+		Id:      id,
 	}
 }
 
-func (r *Server) Resolve(ctx context.Context, rd io.Reader) {
+func ErrorResponse(id any, err error) *Response {
+	return &Response{
+		JsonRpc: "2.0",
+		Error:   err,
+		Id:      id,
+	}
+}
+
+func (r *Server) callMethod(ctx context.Context, req *Request) *Response {
+	h, ok := r.handlers[strings.ToLower(req.Method)]
+	if !ok {
+		return ErrorResponse(req.Id, ErrorFromCode(ErrCodeMethodNotFound))
+	}
+	resp, err := h(ctx, req.Params)
+	if err != nil {
+		return ErrorResponse(req.Id, err)
+	}
+
+	return ResultResponse(req.Id, resp)
+}
+
+func (r *Server) Resolve(ctx context.Context, rd io.Reader, w io.Writer) {
 	dec := json.NewDecoder(rd)
+	enc := json.NewEncoder(w)
 	for {
-		req := new(RpcRequest)
+		req := new(Request)
 		if err := dec.Decode(req); err != nil {
 			break
 		}
 		exec := func() {
 			h := r.callMethod
-			h(ctx, req)
+			resp := h(ctx, req)
+			if req.Id == nil {
+				return
+			}
+			if err := enc.Encode(resp); err != nil {
+				enc.Encode(ErrorResponse(req.Id, ErrorFromCode(ErrCodeInternalError)))
+			}
 		}
 		exec()
 	}

@@ -10,5 +10,5 @@ type Transport interface {
 }
 
 type Resolver interface {
-	Resolve(ctx context.Context, reader io.Reader)
+	Resolve(ctx context.Context, reader io.Reader, writer io.Writer)
 }

@@ -16,6 +16,7 @@ type Provider struct {
 
 var newSet = wire.NewSet(
 	wire.Struct(new(Provider), "*"),
+	wire.Struct(new(handler.Handler), "*"),
 	provider.NewRpcServer,
 	handler.NewExampleHandler,
 )

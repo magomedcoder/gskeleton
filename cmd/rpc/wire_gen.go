@@ -9,13 +9,18 @@ package main
 import (
 	"github.com/google/wire"
 	"json-rpc-skeleton/internal/provider"
+	"json-rpc-skeleton/internal/transport/rpc/handler"
 	"json-rpc-skeleton/pkg/rpc"
 )
 
 // Injectors from wire.go:
 
 func Initialize() *Provider {
-	server := provider.NewRpcServer()
+	example := handler.NewExampleHandler()
+	handlerHandler := &handler.Handler{
+		Example: example,
+	}
+	server := provider.NewRpcServer(handlerHandler)
 	mainProvider := &Provider{
 		Server: server,
 	}
@@ -28,4 +33,4 @@ type Provider struct {
 	Server *rpc.Server
 }
 
-var newSet = wire.NewSet(wire.Struct(new(Provider), "*"), provider.NewRpcServer)
+var newSet = wire.NewSet(wire.Struct(new(Provider), "*"), wire.Struct(new(handler.Handler), "*"), provider.NewRpcServer, handler.NewExampleHandler)

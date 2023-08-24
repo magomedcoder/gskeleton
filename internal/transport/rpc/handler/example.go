@@ -1,6 +1,6 @@
 package handler
 
-import "fmt"
+import "context"
 
 type Example struct{}
 
@@ -8,6 +8,10 @@ func NewExampleHandler() *Example {
 	return &Example{}
 }
 
-func (e *Example) Get() {
-	fmt.Println("example.get")
+type ExampleResponse struct {
+	Text string `json:"text"`
+}
+
+func (e *Example) Get(ctx context.Context) (ExampleResponse, error) {
+	return ExampleResponse{Text: "example.get"}, nil
 }

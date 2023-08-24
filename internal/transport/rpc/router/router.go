@@ -7,7 +7,7 @@ import (
 
 func Methods(server *rpc.Server, handler *handler.Handler) *rpc.Server {
 
-	server.Register("example.get", handler.Example.Get)
+	server.Register("example.get", rpc.Param(handler.Example.Get))
 
 	return server
 }
