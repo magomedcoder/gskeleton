@@ -5,6 +5,7 @@ package main
 
 import (
 	"github.com/google/wire"
+	"json-rpc-skeleton/internal/config"
 	"json-rpc-skeleton/internal/provider"
 	"json-rpc-skeleton/internal/transport/rpc/handler"
 	"json-rpc-skeleton/pkg/rpc"
@@ -21,6 +22,6 @@ var newSet = wire.NewSet(
 	handler.NewExampleHandler,
 )
 
-func Initialize() *Provider {
+func Initialize(conf *config.Config) *Provider {
 	panic(wire.Build(newSet))
 }

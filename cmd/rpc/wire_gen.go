@@ -8,6 +8,7 @@ package main
 
 import (
 	"github.com/google/wire"
+	"json-rpc-skeleton/internal/config"
 	"json-rpc-skeleton/internal/provider"
 	"json-rpc-skeleton/internal/transport/rpc/handler"
 	"json-rpc-skeleton/pkg/rpc"
@@ -15,12 +16,12 @@ import (
 
 // Injectors from wire.go:
 
-func Initialize() *Provider {
+func Initialize(conf *config.Config) *Provider {
 	example := handler.NewExampleHandler()
 	handlerHandler := &handler.Handler{
 		Example: example,
 	}
-	server := provider.NewRpcServer(handlerHandler)
+	server := provider.NewRpcServer(conf, handlerHandler)
 	mainProvider := &Provider{
 		Server: server,
 	}

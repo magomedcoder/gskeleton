@@ -2,17 +2,25 @@ package rpc
 
 import (
 	"context"
+	"json-rpc-skeleton/internal/config"
 	"log"
 	"net"
 	"net/http"
 )
 
-type HTTP struct{}
+type HTTP struct {
+	App config.App
+}
 
 func (h *HTTP) Run(ctx context.Context, resolver Resolver) error {
 	srv := http.Server{
-		Addr: ":8000",
+		Addr: ":" + h.App.RpcPort,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "POST")
+			w.Header().Set("Access-Control-Allow-Headers", "*")
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
 			resolver.Resolve(ctx, r.Body, w)
 		}),
 		BaseContext: func(l net.Listener) context.Context {
