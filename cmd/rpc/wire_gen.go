@@ -8,10 +8,10 @@ package main
 
 import (
 	"github.com/google/wire"
-	"json-rpc-skeleton/internal/config"
-	"json-rpc-skeleton/internal/provider"
-	"json-rpc-skeleton/internal/transport/rpc/handler"
-	"json-rpc-skeleton/pkg/rpc"
+	"jsonrpc/internal/config"
+	"jsonrpc/internal/provider"
+	"jsonrpc/internal/transport/rpc/handler"
+	"jsonrpc/pkg/rpc"
 )
 
 // Injectors from wire.go:

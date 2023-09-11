@@ -1,4 +1,4 @@
-## Json-rpc server skeleton
+## Jsonrpc server
 
 ## Install
 
@@ -19,6 +19,15 @@ make run
     "jsonrpc": "2.0",
     "method": "example.get",
     "params": {},
+    "id": 1
+}
+
+{
+    "jsonrpc": "2.0",
+    "method": "example.set",
+    "params": {
+        "text": "Test",
+    },
     "id": 1
 }
 ```

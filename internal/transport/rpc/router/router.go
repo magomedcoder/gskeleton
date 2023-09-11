@@ -1,13 +1,14 @@
 package router
 
 import (
-	"json-rpc-skeleton/internal/transport/rpc/handler"
-	"json-rpc-skeleton/pkg/rpc"
+	"jsonrpc/internal/transport/rpc/handler"
+	"jsonrpc/pkg/rpc"
 )
 
 func Methods(server *rpc.Server, handler *handler.Handler) *rpc.Server {
 
-	server.Register("example.get", rpc.Param(handler.Example.Get))
+	server.Register("example.set", rpc.Param(handler.Example.Set))
+	server.Register("example.get", rpc.EmptyParam(handler.Example.Get))
 
 	return server
 }

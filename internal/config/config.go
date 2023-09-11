@@ -7,7 +7,7 @@ import (
 )
 
 type App struct {
-	RpcPort string `json:"rpc_port" yaml:"rpc_port"`
+	Port string `json:"port" yaml:"port"`
 }
 
 type Config struct {

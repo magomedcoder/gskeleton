@@ -75,6 +75,9 @@ func (r *Server) Resolve(ctx context.Context, rd io.Reader, w io.Writer) {
 			if err := enc.Encode(resp); err != nil {
 				enc.Encode(ErrorResponse(req.Id, ErrorFromCode(ErrCodeInternalError)))
 			}
+			if w, canFlush := w.(Flusher); canFlush {
+				w.Flush()
+			}
 		}
 		exec()
 	}

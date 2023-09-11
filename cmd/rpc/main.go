@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"github.com/urfave/cli/v2"
-	"json-rpc-skeleton/internal/config"
+	"jsonrpc/internal/config"
 	"log"
 	"os"
 	"os/signal"

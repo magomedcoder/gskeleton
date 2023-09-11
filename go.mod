@@ -1,4 +1,4 @@
-module json-rpc-skeleton
+module jsonrpc
 
 go 1.20
 

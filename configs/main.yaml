@@ -1,2 +1,2 @@
 app:
-  rpc_port: xxxx
+  port: xxxx

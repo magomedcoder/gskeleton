@@ -1,10 +1,10 @@
 package provider
 
 import (
-	"json-rpc-skeleton/internal/config"
-	"json-rpc-skeleton/internal/transport/rpc/handler"
-	"json-rpc-skeleton/internal/transport/rpc/router"
-	"json-rpc-skeleton/pkg/rpc"
+	"jsonrpc/internal/config"
+	"jsonrpc/internal/transport/rpc/handler"
+	"jsonrpc/internal/transport/rpc/router"
+	"jsonrpc/pkg/rpc"
 )
 
 func NewRpcServer(conf *config.Config, handler *handler.Handler) *rpc.Server {

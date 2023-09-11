@@ -23,15 +23,30 @@ type Handler func(ctx context.Context, req *Request) *Response
 
 type HandlerFunc func(context.Context, json.RawMessage) (json.RawMessage, error)
 
-func Param[Response any](handler func(context.Context) (Response, error)) HandlerFunc {
+type Flusher interface {
+	Flush()
+}
+
+func Param[Request any, Response any](handler func(context.Context, *Request) (Response, error)) HandlerFunc {
+	return func(ctx context.Context, in json.RawMessage) (json.RawMessage, error) {
+		req := new(Request)
+		if err := json.Unmarshal(in, req); err != nil {
+			return nil, ErrorFromCode(ErrCodeParseError)
+		}
+		resp, err := handler(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+
+		return json.Marshal(resp)
+	}
+}
+
+func EmptyParam[Response any](handler func(context.Context) (Response, error)) HandlerFunc {
 	return func(ctx context.Context, in json.RawMessage) (json.RawMessage, error) {
 		resp, err := handler(ctx)
-
 		if err != nil {
-			return nil, Error{
-				Code:    ErrUser,
-				Message: err.Error(),
-			}
+			return nil, err
 		}
 
 		return json.Marshal(resp)
