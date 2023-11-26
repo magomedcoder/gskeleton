@@ -1,8 +1,8 @@
-package rpc
+package server
 
 import (
 	"context"
-	"jsonrpc/internal/config"
+	"golang-app-skeleton/internal/config"
 	"log"
 	"net"
 	"net/http"
@@ -27,10 +27,12 @@ func (h *HTTP) Run(ctx context.Context, resolver Resolver) error {
 			return ctx
 		},
 	}
+
 	go func() {
 		<-ctx.Done()
 		srv.Close()
 	}()
+
 	log.Println("Запущен")
 	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 		return err

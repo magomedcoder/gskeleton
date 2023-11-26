@@ -1,4 +1,4 @@
-package rpc
+package server
 
 type Option func(s *Server)
 

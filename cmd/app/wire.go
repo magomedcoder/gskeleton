@@ -5,14 +5,14 @@ package main
 
 import (
 	"github.com/google/wire"
-	"jsonrpc/internal/config"
-	"jsonrpc/internal/provider"
-	"jsonrpc/internal/transport/rpc/handler"
-	"jsonrpc/pkg/rpc"
+	"golang-app-skeleton/internal/config"
+	"golang-app-skeleton/internal/provider"
+	"golang-app-skeleton/internal/transport/app/handler"
+	"golang-app-skeleton/pkg/server"
 )
 
 type Provider struct {
-	Server *rpc.Server
+	Server *server.Server
 }
 
 var newSet = wire.NewSet(

@@ -1,7 +1,7 @@
 .PHONY: run
 run:
-	go run ./cmd/rpc ./configs/main.yaml
+	go run ./cmd/app ./configs/main.yaml
 
 .PHONY: build
 build:
-	go build -o ./build/rpc-server ./cmd/rpc
+	go build -o ./build/app-skeleton ./cmd/app

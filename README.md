@@ -1,4 +1,4 @@
-## Jsonrpc server
+## Golang app skeleton
 
 ## Install
 
@@ -26,7 +26,7 @@ make run
     "jsonrpc": "2.0",
     "method": "example.set",
     "params": {
-        "text": "Test",
+        "text": "Test"
     },
     "id": 1
 }
@@ -42,7 +42,7 @@ make build
 
 ```
 ├── cmd
-│    └── rpc
+│    └── app
 │        ├── main.go
 │        ├── wire.go
 │        └── wire_gen.go
@@ -54,14 +54,14 @@ make build
 │   ├── provider
 │   │   └── server.go
 │   └── transport
-│       └── rpc
+│       └── app
 │           ├── handler
 │           │   ├── example.go
 │           │   └── handler.go
 │           └── router
 │               └── router.go
 ├── pkg
-│   └── rpc
+│   └── server
 │       ├── error.go
 │       ├── http.go
 │       ├── options.go
