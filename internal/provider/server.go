@@ -5,16 +5,22 @@ import (
 	"golang-app-skeleton/internal/transport/app/handler"
 	"golang-app-skeleton/internal/transport/app/router"
 	"golang-app-skeleton/pkg/server"
+	"net/http"
 )
 
 func NewRpcServer(conf *config.Config, handler *handler.Handler) *server.Server {
-	http := &server.HTTP{
+	_http := &server.HTTP{
 		App: conf.App,
 	}
-	server := server.New(
-		server.WithTransport(http),
-	)
-	server = router.Methods(server, handler)
 
-	return server
+	_http.Uploader = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		//TODO Обработайте логику загрузки файла здесь
+	})
+
+	s := server.New(
+		server.WithTransport(_http),
+	)
+	s = router.Methods(s, handler)
+
+	return s
 }

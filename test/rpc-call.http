@@ -1,0 +1,25 @@
+### Call example
+
+### Method - example.get
+POST http://127.0.0.1:8000/json-rpc
+Content-Type: application/json
+
+{
+    "jsonrpc": "2.0",
+    "method": "example.get",
+    "params": {},
+    "id": 1
+}
+
+### Method - example.set
+POST http://127.0.0.1:8000/json-rpc
+Content-Type: application/json
+
+{
+    "jsonrpc": "2.0",
+    "method": "example.set",
+    "params": {
+        "text": "Test"
+    },
+    "id": 1
+}

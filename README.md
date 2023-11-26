@@ -12,26 +12,6 @@ go mod tidy
 make run
 ```
 
-## Call example
-
-```
-{
-    "jsonrpc": "2.0",
-    "method": "example.get",
-    "params": {},
-    "id": 1
-}
-
-{
-    "jsonrpc": "2.0",
-    "method": "example.set",
-    "params": {
-        "text": "Test"
-    },
-    "id": 1
-}
-```
-
 ## Build
 
 ```shell

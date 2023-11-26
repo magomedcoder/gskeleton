@@ -9,23 +9,37 @@ import (
 )
 
 type HTTP struct {
-	App config.App
+	App      config.App
+	Uploader http.Handler
 }
 
 func (h *HTTP) Run(ctx context.Context, resolver Resolver) error {
 	srv := http.Server{
 		Addr: ":" + h.App.Port,
-		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		BaseContext: func(l net.Listener) context.Context {
+			return ctx
+		},
+	}
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.NotFound(w, r)
+	})
+
+	http.HandleFunc("/json-rpc", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Allow-Methods", "POST")
 			w.Header().Set("Access-Control-Allow-Headers", "*")
 			w.Header().Add("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			resolver.Resolve(ctx, r.Body, w)
-		}),
-		BaseContext: func(l net.Listener) context.Context {
-			return ctx
-		},
+		} else {
+			http.NotFound(w, r)
+		}
+	})
+
+	if h.Uploader != nil {
+		http.Handle("/upload", h.Uploader)
 	}
 
 	go func() {
