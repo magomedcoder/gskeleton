@@ -1,21 +1,20 @@
-package server
+package json_rpc_server
 
 import (
 	"context"
-	"golang-app-skeleton/internal/config"
 	"log"
 	"net"
 	"net/http"
 )
 
 type HTTP struct {
-	App      config.App
+	Addr     string
 	Uploader http.Handler
 }
 
 func (h *HTTP) Run(ctx context.Context, resolver Resolver) error {
 	srv := http.Server{
-		Addr: ":" + h.App.Port,
+		Addr: h.Addr,
 		BaseContext: func(l net.Listener) context.Context {
 			return ctx
 		},

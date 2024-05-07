@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
+	"github.com/magomedcoder/gskeleton/internal/config"
 	"github.com/urfave/cli/v2"
-	"golang-app-skeleton/internal/config"
 	"log"
 	"os"
 	"os/signal"

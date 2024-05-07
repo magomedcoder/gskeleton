@@ -1,28 +1,14 @@
 ## Golang app skeleton
 
-## Install
-
-```shell
-go mod tidy
-```
-
-## Run
-
-```shell
-make run
-```
-
-## Build
-
-```shell
-make build
-```
-
 ## Folder structure
 
 ```
 ├── cmd
-│    └── app
+│    ├── grpc
+│    │   ├── main.go
+│    │   ├── wire.go
+│    │   └── wire_gen.go
+│    └── json-rpc
 │        ├── main.go
 │        ├── wire.go
 │        └── wire_gen.go
@@ -30,18 +16,38 @@ make build
 │   └── main.yaml
 ├── internal
 │   ├── config
-│   │   └── config.go
-│   ├── provider
+│   │   ├── config.go
+│   │   ├── jwt.go
+│   │   ├── postgres.go
 │   │   └── server.go
+│   ├── provider
+│   │   ├── grpc_server.go
+│   │   ├── json_rpc_server.go
+│   │   └── postgres.go
 │   └── transport
-│       └── app
+│   │   ├── model
+│   │   │   └─ user.go
+│   │   └── repo
+│   │       └─ user.go
+│   └── transport
+│       ├── grpc
+│       │   ├── handler
+│       │   │   ├── auth.go
+│       │   │   └── user.go
+│       │   ├── middleware
+│       │   │   ├── auth.go
+│       │   │   ├── global.go
+│       │   │   └── token.go
+│       │   └── router
+│       │       └── methods.go
+│       └── json-rpc
 │           ├── handler
 │           │   ├── example.go
 │           │   └── handler.go
 │           └── router
 │               └── router.go
 ├── pkg
-│   └── server
+│   └── json-rpc-server
 │       ├── error.go
 │       ├── http.go
 │       ├── options.go

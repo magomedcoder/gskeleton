@@ -5,20 +5,20 @@ package main
 
 import (
 	"github.com/google/wire"
-	"golang-app-skeleton/internal/config"
-	"golang-app-skeleton/internal/provider"
-	"golang-app-skeleton/internal/transport/app/handler"
-	"golang-app-skeleton/pkg/server"
+	"github.com/magomedcoder/gskeleton/internal/config"
+	"github.com/magomedcoder/gskeleton/internal/provider"
+	"github.com/magomedcoder/gskeleton/internal/transport/json-rpc/handler"
+	"github.com/magomedcoder/gskeleton/pkg/json-rpc-server"
 )
 
 type Provider struct {
-	Server *server.Server
+	Server *json_rpc_server.Server
 }
 
 var newSet = wire.NewSet(
 	wire.Struct(new(Provider), "*"),
 	wire.Struct(new(handler.Handler), "*"),
-	provider.NewRpcServer,
+	provider.NewJsonRpcServer,
 	handler.NewExampleHandler,
 )
 

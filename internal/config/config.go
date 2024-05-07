@@ -6,12 +6,10 @@ import (
 	"os"
 )
 
-type App struct {
-	Port string `json:"port" yaml:"port"`
-}
-
 type Config struct {
-	App App `json:"app" yaml:"app"`
+	Server     *Server     `yaml:"server"`
+	Postgresql *Postgresql `yaml:"postgresql"`
+	Jwt        *Jwt        `yaml:"jwt"`
 }
 
 func ReadConfig(filename string) (*Config, error) {
