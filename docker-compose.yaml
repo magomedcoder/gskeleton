@@ -1,0 +1,51 @@
+services:
+  http_server:
+    container_name: http-server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: /usr/bin/gskeleton run-http
+    volumes:
+      - ./configs/gskeleton.yaml:/etc/gskeleton/gskeleton.yaml
+    restart: always
+    ports:
+      - '8000:8000'
+    networks:
+      - network-gskeleton
+    depends_on:
+      - postgres
+
+  grpc_server:
+    container_name: grpc-server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: /usr/bin/gskeleton run-grpc
+    volumes:
+      - ./configs/gskeleton.yaml:/etc/gskeleton/gskeleton.yaml
+    restart: always
+    ports:
+      - '50051:50051'
+    networks:
+      - network-gskeleton
+    depends_on:
+      - postgres
+
+  postgres:
+    container_name: postgres
+    image: postgres:16
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres:/data/postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=gskeleton
+
+volumes:
+  postgres:
+
+networks:
+  network-gskeleton:
+    driver: bridge
