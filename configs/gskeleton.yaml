@@ -1,0 +1,17 @@
+server:
+  http:
+    port: 8000
+  grpc:
+    host: "127.0.0.1"
+    grpc_port: 50051
+    grpc_protocol: "tcp"
+
+postgresql:
+  host: 127.0.0.1
+  port: 5432
+  user: postgres
+  password: postgres
+  database: gskeleton
+
+jwt:
+  secret: "secret"

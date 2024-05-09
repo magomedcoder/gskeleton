@@ -1,16 +1,16 @@
 package config
 
+type Http struct {
+	Port int `yaml:"port"`
+}
+
 type Grpc struct {
 	Host         string `yaml:"host"`
 	GrpcProtocol string `yaml:"grpc_protocol"`
-	GrpcPort     string `yaml:"grpc_port"`
-}
-
-type JsonRpc struct {
-	Port string `yaml:"port"`
+	GrpcPort     int    `yaml:"grpc_port"`
 }
 
 type Server struct {
-	JsonRpc *JsonRpc `yaml:"json_rpc"`
-	Grpc    *Grpc    `yaml:"grpc"`
+	Http *Http `yaml:"http"`
+	Grpc *Grpc `yaml:"grpc"`
 }

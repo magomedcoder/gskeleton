@@ -1,64 +1,16 @@
-## Golang app skeleton
+# Go Clean Architecture Template
 
-## Folder structure
+## Overview
 
-```
-├── cmd
-│    ├── grpc
-│    │   ├── main.go
-│    │   ├── wire.go
-│    │   └── wire_gen.go
-│    └── json-rpc
-│        ├── main.go
-│        ├── wire.go
-│        └── wire_gen.go
-├── configs
-│   └── main.yaml
-├── internal
-│   ├── config
-│   │   ├── config.go
-│   │   ├── jwt.go
-│   │   ├── postgres.go
-│   │   └── server.go
-│   ├── provider
-│   │   ├── grpc_server.go
-│   │   ├── json_rpc_server.go
-│   │   └── postgres.go
-│   └── transport
-│   │   ├── model
-│   │   │   └─ user.go
-│   │   └── repo
-│   │       └─ user.go
-│   └── transport
-│       ├── grpc
-│       │   ├── handler
-│       │   │   ├── auth.go
-│       │   │   └── user.go
-│       │   ├── middleware
-│       │   │   ├── auth.go
-│       │   │   ├── global.go
-│       │   │   └── token.go
-│       │   └── router
-│       │       └── methods.go
-│       └── json-rpc
-│           ├── handler
-│           │   ├── example.go
-│           │   └── handler.go
-│           └── router
-│               └── router.go
-├── pkg
-│   └── json-rpc-server
-│       ├── error.go
-│       ├── http.go
-│       ├── options.go
-│       ├── rpc.go
-│       ├── server.go
-│       └── transport.go
-├── .editorconfig
-├── .gitignore
-├── go.mod
-├── go.sum
-├── LICENSE
-├── Makefile
-└── README.md
-```
+This repository provides a basic folder structure for developing applications in Go using Clean Architecture principles.
+By following this structure, you can focus on building your application without spending time on organizing folders and
+files.
+
+## Why Clean Architecture?
+
+Clean Architecture helps separate concerns within your application, making the codebase more modular, testable, and
+maintainable. The key benefits include:
+
+- **Independence**: Core business logic is separated from external dependencies and frameworks.
+- **Testability**: Each component can be tested independently, making unit and integration testing more straightforward.
+- **Flexibility**: You can easily replace or modify components without affecting the entire application.

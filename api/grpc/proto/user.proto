@@ -2,28 +2,32 @@ syntax = "proto3";
 
 package user;
 
-option go_package = "./pb";
-
-message CreateUserRequest {
-    string username = 1;
-    string password = 2;
-}
-
-message CreateUserResponse {
-    bool success = 1;
-}
-
-message GetUserInfoRequest {
-    string username = 1;
-}
-
-message GetUserInfoResponse {
-    int32 id = 1;
-    string username = 2;
-    string createAt = 3;
-}
+option go_package = "github.com/magomedcoder/gskeleton/api/grpc/pb/user;pb";
 
 service UserService {
-    rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {}
-    rpc GetUserInfo(GetUserInfoRequest) returns (GetUserInfoResponse) {}
+    rpc Create(Create.Request) returns (Create.Response) {}
+    rpc Get(Get.Request) returns (Get.Response) {}
+}
+
+message Create {
+    message Request {
+        string username = 1;
+        string password = 2;
+    }
+
+    message Response {
+        bool success = 1;
+    }
+}
+
+message Get {
+    message Request {
+        string username = 1;
+    }
+
+    message Response {
+        int32 id = 1;
+        string username = 2;
+        string createAt = 3;
+    }
 }
