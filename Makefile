@@ -17,6 +17,9 @@ run-grpc:
 cli-migrate:
 	go run ./cmd/gskeleton cli-migrate -config ./configs/gskeleton.yaml
 
+test:
+	go test -v ./...
+
 .PHONY: build
 build:
 	go build -o ./build/gskeleton ./cmd/gskeleton

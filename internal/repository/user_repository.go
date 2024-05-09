@@ -27,7 +27,7 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 }
 
 func (u *UserRepository) Create(ctx context.Context, user *model.User) (*model.User, error) {
-	if err := u.Repo.Create(ctx, user); err.Error != nil {
+	if err := u.Repo.Create(ctx, user); err != nil {
 		log.Printf("Не удалось создать пользователя: %s", err)
 		return nil, err
 	}
