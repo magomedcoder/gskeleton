@@ -19,7 +19,7 @@ type UserHandler struct {
 }
 
 func (u *UserHandler) Get(ctx context.Context, in *pb.Get_Request) (*pb.Get_Response, error) {
-	user, _ := u.UserUseCase.GetUserByUsername(in.Username)
+	user, _ := u.UserUseCase.GetUserByUsername(ctx, in.Username)
 	if user.Id == 0 {
 		return nil, status.Error(codes.NotFound, "Пользователь не найден")
 	}
@@ -48,7 +48,7 @@ func (u *UserHandler) Create(ctx context.Context, in *pb.Create_Request) (*pb.Cr
 		CreatedAt: time.Now(),
 	}
 
-	if _, err = u.UserUseCase.Create(user); err != nil {
+	if _, err = u.UserUseCase.Create(ctx, &user); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 

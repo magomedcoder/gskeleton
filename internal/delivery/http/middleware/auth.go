@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	http_server "github.com/magomedcoder/gskeleton/pkg/http-server"
+	"github.com/magomedcoder/gskeleton/pkg/core"
 	"net/http"
 	"strings"
 
@@ -19,7 +19,7 @@ func (a *AuthMiddleware) Auth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := AuthHeaderToken(ctx)
 		if token == "" {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, &http_server.Response{
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, &core.Response{
 				Message: "Невалидный токен",
 			})
 			return

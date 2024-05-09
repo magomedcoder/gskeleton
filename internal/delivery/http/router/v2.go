@@ -8,15 +8,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func newV1(r *gin.Engine, h *handler.Handler, m *middleware.Middleware) *gin.Engine {
+func newV2(r *gin.Engine, h *handler.Handler, m *middleware.Middleware) *gin.Engine {
 	authorize := m.AuthMiddleware.Auth()
 
-	v1 := r.Group("/v1")
+	v2 := r.Group("/v2")
 	{
-		user := v1.Group("/users").Use(authorize)
+		user := v2.Group("/users").Use(authorize)
 		{
-			user.GET("", core.GinHandlerFunc(h.V1.User.List))
-			user.GET("/:id", core.GinHandlerFunc(h.V1.User.Get))
+			user.GET("", core.GinHandlerFunc(h.V2.User.List))
+			user.GET("/:id", core.GinHandlerFunc(h.V2.User.Get))
 		}
 	}
 

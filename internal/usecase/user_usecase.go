@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"fmt"
 	"github.com/magomedcoder/gskeleton/internal/model"
 	"github.com/magomedcoder/gskeleton/internal/repository"
@@ -10,9 +11,11 @@ import (
 )
 
 type IUserUseCase interface {
-	Create(userModel model.User) (*model.User, error)
+	Create(ctx context.Context, userModel *model.User) (*model.User, error)
 
-	GetUserByUsername(username string) (*model.User, error)
+	GetUserById(ctx context.Context, id int) (*model.User, error)
+
+	GetUserByUsername(ctx context.Context, username string) (*model.User, error)
 
 	HashPassword(password string) (string, error)
 
@@ -25,14 +28,6 @@ type UserUseCase struct {
 	UserRepo repository.IUserRepository
 }
 
-func NewUserUseCase(
-	userRepo repository.IUserRepository,
-) *UserUseCase {
-	return &UserUseCase{
-		UserRepo: userRepo,
-	}
-}
-
 func (u *UserUseCase) HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(bytes), err
@@ -43,8 +38,8 @@ func (u *UserUseCase) CheckPasswordHash(password, hash string) (bool, error) {
 	return err == nil, err
 }
 
-func (u *UserUseCase) Create(userModel model.User) (*model.User, error) {
-	user, err := u.UserRepo.GetByUsername(userModel.Username)
+func (u *UserUseCase) Create(ctx context.Context, userModel *model.User) (*model.User, error) {
+	user, err := u.UserRepo.GetByUsername(ctx, userModel.Username)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("Не удалось создать пользователя: %s", user.Username))
 	}
@@ -53,7 +48,7 @@ func (u *UserUseCase) Create(userModel model.User) (*model.User, error) {
 		return nil, status.Error(codes.AlreadyExists, fmt.Sprintf("Пользователь %s уже существует", user.Username))
 	}
 
-	createdUser, err := u.UserRepo.Create(userModel)
+	createdUser, err := u.UserRepo.Create(ctx, userModel)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Не удалось создать пользователя")
 	}
@@ -61,8 +56,17 @@ func (u *UserUseCase) Create(userModel model.User) (*model.User, error) {
 	return createdUser, nil
 }
 
-func (u *UserUseCase) GetUserByUsername(username string) (*model.User, error) {
-	user, err := u.UserRepo.GetByUsername(username)
+func (u *UserUseCase) GetUserById(ctx context.Context, id int) (*model.User, error) {
+	user, err := u.UserRepo.Get(ctx, id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("Не удалось получить пользователя: %v", id))
+	}
+
+	return user, nil
+}
+
+func (u *UserUseCase) GetUserByUsername(ctx context.Context, username string) (*model.User, error) {
+	user, err := u.UserRepo.GetByUsername(ctx, username)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("Не удалось получить пользователя: %s", username))
 	}

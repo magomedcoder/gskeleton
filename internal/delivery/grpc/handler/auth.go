@@ -17,7 +17,7 @@ type AuthHandler struct {
 }
 
 func (a *AuthHandler) Login(ctx context.Context, in *pb.Login_Request) (*pb.Login_Response, error) {
-	user, err := a.UserUseCase.GetUserByUsername(in.Username)
+	user, err := a.UserUseCase.GetUserByUsername(ctx, in.Username)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "Пользователь не найден")
 	}

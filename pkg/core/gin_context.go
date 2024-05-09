@@ -1,4 +1,4 @@
-package http_server
+package core
 
 import (
 	"fmt"
@@ -19,35 +19,35 @@ var MarshalOptions = protojson.MarshalOptions{
 	EmitUnpopulated: true,
 }
 
-type Context struct {
+type GinContext struct {
 	Context *gin.Context
 }
 
-func New(ctx *gin.Context) *Context {
-	return &Context{ctx}
+func NewGinContext(ctx *gin.Context) *GinContext {
+	return &GinContext{ctx}
 }
 
-func (c *Context) Error(error string) error {
-	c.Context.AbortWithStatusJSON(http.StatusInternalServerError, &Response{
+func (g *GinContext) Error(error string) error {
+	g.Context.AbortWithStatusJSON(http.StatusInternalServerError, &Response{
 		Message: error,
 	})
 
 	return nil
 }
 
-func (c *Context) Success(data any) error {
+func (g *GinContext) Success(data any) error {
 	resp := data
 
 	if value, ok := data.(proto.Message); ok {
 		bt, _ := MarshalOptions.Marshal(value)
 		var data any
 		if err := jsonutil.Decode(string(bt), &data); err != nil {
-			return c.Error(err.Error())
+			return g.Error(err.Error())
 		}
 		resp = data
 	}
 
-	c.Context.AbortWithStatusJSON(http.StatusOK, resp)
+	g.Context.AbortWithStatusJSON(http.StatusOK, resp)
 
 	return nil
 }
@@ -62,7 +62,7 @@ func Translate(err error) string {
 	return err.Error()
 }
 
-func (c *Context) InvalidParams(message any) error {
+func (g *GinContext) InvalidParams(message any) error {
 	resp := &Response{Message: "Недопустимые параметры"}
 
 	switch msg := message.(type) {
@@ -74,12 +74,12 @@ func (c *Context) InvalidParams(message any) error {
 		resp.Message = fmt.Sprintf("%v", msg)
 	}
 
-	c.Context.AbortWithStatusJSON(http.StatusOK, resp)
+	g.Context.AbortWithStatusJSON(http.StatusOK, resp)
 
 	return nil
 }
 
-func (c *Context) ErrorBusiness(message any) error {
+func (g *GinContext) ErrorBusiness(message any) error {
 	resp := &Response{Message: "Недопустимые параметры"}
 
 	switch msg := message.(type) {
@@ -91,7 +91,7 @@ func (c *Context) ErrorBusiness(message any) error {
 		resp.Message = fmt.Sprintf("%v", msg)
 	}
 
-	c.Context.AbortWithStatusJSON(http.StatusBadRequest, resp)
+	g.Context.AbortWithStatusJSON(http.StatusBadRequest, resp)
 
 	return nil
 }

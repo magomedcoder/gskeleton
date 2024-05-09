@@ -4,11 +4,6 @@ package user;
 
 option go_package = "github.com/magomedcoder/gskeleton/api/grpc/pb/user;pb";
 
-service UserService {
-    rpc Create(Create.Request) returns (Create.Response) {}
-    rpc Get(Get.Request) returns (Get.Response) {}
-}
-
 message Create {
     message Request {
         string username = 1;
@@ -30,4 +25,9 @@ message Get {
         string username = 2;
         string createAt = 3;
     }
+}
+
+service UserService {
+    rpc Create(Create.Request) returns (Create.Response) {}
+    rpc Get(Get.Request) returns (Get.Response) {}
 }

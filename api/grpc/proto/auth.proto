@@ -4,10 +4,6 @@ package auth;
 
 option go_package = "github.com/magomedcoder/gskeleton/api/grpc/pb/auth;pb";
 
-service AuthService {
-    rpc Login(Login.Request) returns (Login.Response) {}
-}
-
 message Login {
     message Request {
         string username = 1;
@@ -17,4 +13,8 @@ message Login {
     message Response {
         string accessToken = 1;
     }
+}
+
+service AuthService {
+    rpc Login(Login.Request) returns (Login.Response) {}
 }
