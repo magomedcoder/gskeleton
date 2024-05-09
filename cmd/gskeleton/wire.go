@@ -5,6 +5,7 @@ package main
 
 import (
 	"github.com/google/wire"
+	"github.com/magomedcoder/gskeleton/internal/cli"
 	"github.com/magomedcoder/gskeleton/internal/config"
 	"github.com/magomedcoder/gskeleton/internal/delivery/grpc"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http"
@@ -16,4 +17,8 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 
 func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	panic(wire.Build(grpc.ProviderSet))
+}
+
+func NewCliInjector(conf *config.Config) *cli.AppProvider {
+	panic(wire.Build(cli.ProviderSet))
 }

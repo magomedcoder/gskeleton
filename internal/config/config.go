@@ -10,10 +10,10 @@ import (
 )
 
 type Config struct {
-	Server     *Server     `yaml:"server"`
-	Postgresql *Postgresql `yaml:"postgresql"`
-	Jwt        *Jwt        `yaml:"jwt"`
-	sid        string
+	Server   *Server   `yaml:"server"`
+	Postgres *Postgres `yaml:"postgres"`
+	Jwt      *Jwt      `yaml:"jwt"`
+	sid      string
 }
 
 func New(filename string) *Config {

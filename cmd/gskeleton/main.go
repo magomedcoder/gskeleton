@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/magomedcoder/gskeleton/internal/cli"
 	"github.com/magomedcoder/gskeleton/internal/config"
 	"github.com/magomedcoder/gskeleton/internal/delivery/grpc"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http"
@@ -46,11 +47,30 @@ func NewGrpcCommand() provider.Command {
 	}
 }
 
+func NewCliCommand() provider.Command {
+	return provider.Command{
+		Name: "cli-migrate",
+		Flags: []cliV2.Flag{
+			&cliV2.StringFlag{
+				Name:        "config",
+				Aliases:     []string{"c"},
+				Value:       "/etc/gskeleton/gskeleton.yaml",
+				Usage:       "GSkeleton",
+				DefaultText: "/etc/gskeleton/gskeleton.yaml",
+			},
+		},
+		Action: func(ctx *cliV2.Context, conf *config.Config) error {
+			return cli.Migrate(ctx, NewCliInjector(conf))
+		},
+	}
+}
+
 func main() {
 	app := provider.NewApp(&cliV2.App{
 		Name: "GSkeleton",
 	})
 	app.Register(NewHttpCommand())
 	app.Register(NewGrpcCommand())
+	app.Register(NewCliCommand())
 	app.Run()
 }

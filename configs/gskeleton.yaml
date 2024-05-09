@@ -6,10 +6,10 @@ server:
     grpc_port: 50051
     grpc_protocol: "tcp"
 
-postgresql:
+postgres:
   host: 127.0.0.1
   port: 5432
-  user: postgres
+  username: postgres
   password: postgres
   database: gskeleton
 

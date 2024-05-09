@@ -13,6 +13,10 @@ run-http:
 run-grpc:
 	go run ./cmd/gskeleton run-grpc -config ./configs/gskeleton.yaml
 
+.PHONY: cli-migrate
+cli-migrate:
+	go run ./cmd/gskeleton cli-migrate -config ./configs/gskeleton.yaml
+
 .PHONY: build
 build:
 	go build -o ./build/gskeleton ./cmd/gskeleton
@@ -23,7 +27,6 @@ proto:
 		   --go_out=paths=source_relative:./api/grpc/pb \
 		   --go-grpc_out=paths=source_relative:./api/grpc/pb \
 		   ./api/grpc/proto/*.proto
-
 
 .PHONY: install-ubuntu
 install-ubuntu:

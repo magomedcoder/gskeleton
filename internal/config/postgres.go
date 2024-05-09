@@ -1,9 +1,30 @@
 package config
 
-type Postgresql struct {
+import "fmt"
+
+type Postgres struct {
 	Host     string `yaml:"host"`
 	Port     int    `yaml:"port"`
-	User     string `yaml:"user"`
+	Username string `yaml:"username"`
 	Password string `yaml:"password"`
-	Name     string `yaml:"dbname"`
+	Database string `yaml:"database"`
+}
+
+func (p *Postgres) GetDsn() string {
+	fmt.Println(fmt.Sprintf(
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable TimeZone=Europe/Moscow",
+		p.Host,
+		p.Port,
+		p.Username,
+		p.Password,
+		p.Database,
+	))
+	return fmt.Sprintf(
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable TimeZone=Europe/Moscow",
+		p.Host,
+		p.Port,
+		p.Username,
+		p.Password,
+		p.Database,
+	)
 }

@@ -8,6 +8,7 @@ package main
 
 import (
 	"github.com/magomedcoder/gskeleton/api/grpc/pb"
+	"github.com/magomedcoder/gskeleton/internal/cli"
 	"github.com/magomedcoder/gskeleton/internal/config"
 	"github.com/magomedcoder/gskeleton/internal/delivery/grpc"
 	handler2 "github.com/magomedcoder/gskeleton/internal/delivery/grpc/handler"
@@ -15,6 +16,7 @@ import (
 	"github.com/magomedcoder/gskeleton/internal/delivery/http"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/handler"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/handler/v1"
+	"github.com/magomedcoder/gskeleton/internal/delivery/http/handler/v2"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/middleware"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/router"
 	"github.com/magomedcoder/gskeleton/internal/provider"
@@ -27,13 +29,20 @@ import (
 func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	db := provider.NewPostgresDB(conf)
 	userRepository := repository.NewUserRepository(db)
-	userUseCase := usecase.NewUserUseCase(userRepository)
+	userUseCase := &usecase.UserUseCase{
+		UserRepo: userRepository,
+	}
 	user := v1.NewUserHandler(userUseCase)
 	v1V1 := &v1.V1{
 		User: user,
 	}
+	v2User := v2.NewUserHandler(userUseCase)
+	v2V2 := &v2.V2{
+		User: v2User,
+	}
 	handlerHandler := &handler.Handler{
 		V1: v1V1,
+		V2: v2V2,
 	}
 	authMiddleware := middleware.NewAuthMiddleware()
 	middlewareMiddleware := &middleware.Middleware{
@@ -53,7 +62,9 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	unimplementedAuthServiceServer := pb.UnimplementedAuthServiceServer{}
 	db := provider.NewPostgresDB(conf)
 	userRepository := repository.NewUserRepository(db)
-	userUseCase := usecase.NewUserUseCase(userRepository)
+	userUseCase := &usecase.UserUseCase{
+		UserRepo: userRepository,
+	}
 	authHandler := &handler2.AuthHandler{
 		UnimplementedAuthServiceServer: unimplementedAuthServiceServer,
 		TokenMiddleware:                tokenMiddleware,
@@ -71,6 +82,15 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 		RoutesServices:  grpcMethodService,
 		AuthHandler:     authHandler,
 		UserHandler:     userHandler,
+	}
+	return appProvider
+}
+
+func NewCliInjector(conf *config.Config) *cli.AppProvider {
+	db := provider.NewPostgresDB(conf)
+	appProvider := &cli.AppProvider{
+		Conf: conf,
+		Db:   db,
 	}
 	return appProvider
 }
