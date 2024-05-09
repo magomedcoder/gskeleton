@@ -12,6 +12,15 @@ func NewHttpCommand() provider.Command {
 	return provider.Command{
 		Name:  "run-http",
 		Usage: "Http server",
+		Flags: []cliV2.Flag{
+			&cliV2.StringFlag{
+				Name:        "config",
+				Aliases:     []string{"c"},
+				Value:       "/etc/gskeleton/gskeleton.yaml",
+				Usage:       "GSkeleton",
+				DefaultText: "/etc/gskeleton/gskeleton.yaml",
+			},
+		},
 		Action: func(ctx *cliV2.Context, conf *config.Config) error {
 			return http.Run(ctx, NewHttpInjector(conf))
 		},
@@ -22,6 +31,15 @@ func NewGrpcCommand() provider.Command {
 	return provider.Command{
 		Name:  "run-grpc",
 		Usage: "GRPC server",
+		Flags: []cliV2.Flag{
+			&cliV2.StringFlag{
+				Name:        "config",
+				Aliases:     []string{"c"},
+				Value:       "/etc/gskeleton/gskeleton.yaml",
+				Usage:       "GSkeleton",
+				DefaultText: "/etc/gskeleton/gskeleton.yaml",
+			},
+		},
 		Action: func(ctx *cliV2.Context, conf *config.Config) error {
 			return grpc.Run(ctx, NewGrpcInjector(conf))
 		},
@@ -29,7 +47,9 @@ func NewGrpcCommand() provider.Command {
 }
 
 func main() {
-	app := provider.NewApp()
+	app := provider.NewApp(&cliV2.App{
+		Name: "GSkeleton",
+	})
 	app.Register(NewHttpCommand())
 	app.Register(NewGrpcCommand())
 	app.Run()

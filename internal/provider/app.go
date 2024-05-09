@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"log"
 	"os"
 
 	"github.com/magomedcoder/gskeleton/internal/config"
@@ -21,20 +22,9 @@ type Command struct {
 	Subcommands []Command
 }
 
-func NewApp() *App {
+func NewApp(app *cliV2.App) *App {
 	return &App{
-		app: &cliV2.App{
-			Name: "GSkeleton",
-			Flags: []cliV2.Flag{
-				&cliV2.StringFlag{
-					Name:        "config",
-					Aliases:     []string{"c"},
-					Value:       "/etc/gskeleton/gskeleton.yaml",
-					Usage:       "GSkeleton",
-					DefaultText: "/etc/gskeleton/gskeleton.yaml",
-				},
-			},
-		},
+		app: app,
 	}
 }
 
@@ -69,5 +59,7 @@ func (a *App) createSubcommands(commands []Command) []*cliV2.Command {
 }
 
 func (a *App) Run() {
-	_ = a.app.Run(os.Args)
+	if err := a.app.Run(os.Args); err != nil {
+		log.Fatalf("Ошибка cli app: %s", err)
+	}
 }
