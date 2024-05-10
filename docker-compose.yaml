@@ -42,6 +42,17 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=gskeleton
+    networks:
+      - network-gskeleton
+
+  redis:
+    container_name: redis
+    image: redis:alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    networks:
+      - network-gskeleton
 
 volumes:
   postgres:

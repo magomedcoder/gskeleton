@@ -36,7 +36,7 @@ func Run(ctx *cliV2.Context, app *AppProvider) error {
 	}
 
 	eg.Go(func() error {
-		log.Printf("Http server running at | PID %d", os.Getpid())
+		log.Printf("Http server running at %d | PID %d", app.Conf.Server.Http.Port, os.Getpid())
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			return err
 		}

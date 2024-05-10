@@ -8,7 +8,7 @@ package main
 
 import (
 	"github.com/magomedcoder/gskeleton/api/grpc/pb"
-	"github.com/magomedcoder/gskeleton/internal/cli"
+	"github.com/magomedcoder/gskeleton/internal/cli/commands"
 	"github.com/magomedcoder/gskeleton/internal/config"
 	"github.com/magomedcoder/gskeleton/internal/delivery/grpc"
 	handler2 "github.com/magomedcoder/gskeleton/internal/delivery/grpc/handler"
@@ -19,8 +19,9 @@ import (
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/handler/v2"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/middleware"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/router"
+	"github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/repository"
+	repository2 "github.com/magomedcoder/gskeleton/internal/infrastructure/redis/repository"
 	"github.com/magomedcoder/gskeleton/internal/provider"
-	"github.com/magomedcoder/gskeleton/internal/repository"
 	"github.com/magomedcoder/gskeleton/internal/usecase"
 )
 
@@ -29,8 +30,11 @@ import (
 func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	db := provider.NewPostgresDB(conf)
 	userRepository := repository.NewUserRepository(db)
+	client := provider.NewRedisClient(conf)
+	userCacheRepository := repository2.NewUserCacheRepository(client)
 	userUseCase := &usecase.UserUseCase{
-		UserRepo: userRepository,
+		PostgresUserRepo:         userRepository,
+		RedisUserCacheRepository: userCacheRepository,
 	}
 	user := v1.NewUserHandler(userUseCase)
 	v1V1 := &v1.V1{
@@ -62,8 +66,11 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	unimplementedAuthServiceServer := pb.UnimplementedAuthServiceServer{}
 	db := provider.NewPostgresDB(conf)
 	userRepository := repository.NewUserRepository(db)
+	client := provider.NewRedisClient(conf)
+	userCacheRepository := repository2.NewUserCacheRepository(client)
 	userUseCase := &usecase.UserUseCase{
-		UserRepo: userRepository,
+		PostgresUserRepo:         userRepository,
+		RedisUserCacheRepository: userCacheRepository,
 	}
 	authHandler := &handler2.AuthHandler{
 		UnimplementedAuthServiceServer: unimplementedAuthServiceServer,
@@ -86,9 +93,9 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	return appProvider
 }
 
-func NewCliInjector(conf *config.Config) *cli.AppProvider {
+func NewCliInjector(conf *config.Config) *commands.AppProvider {
 	db := provider.NewPostgresDB(conf)
-	appProvider := &cli.AppProvider{
+	appProvider := &commands.AppProvider{
 		Conf: conf,
 		Db:   db,
 	}

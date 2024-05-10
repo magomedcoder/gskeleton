@@ -1,9 +1,9 @@
-package cli
+package commands
 
 import (
 	"github.com/magomedcoder/gskeleton"
 	"github.com/magomedcoder/gskeleton/internal/config"
-	"github.com/magomedcoder/gskeleton/pkg/migrate"
+	"github.com/magomedcoder/gskeleton/pkg/db/migrate"
 	"github.com/urfave/cli/v2"
 	"gorm.io/gorm"
 	"log"

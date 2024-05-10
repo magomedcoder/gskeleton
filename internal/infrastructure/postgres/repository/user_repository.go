@@ -2,8 +2,8 @@ package repository
 
 import (
 	"context"
-	"github.com/magomedcoder/gskeleton/internal/model"
-	"github.com/magomedcoder/gskeleton/pkg/repo"
+	"github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/model"
+	"github.com/magomedcoder/gskeleton/pkg/db/gormrepo"
 	"gorm.io/gorm"
 	"log"
 )
@@ -11,7 +11,9 @@ import (
 type IUserRepository interface {
 	Create(ctx context.Context, user *model.User) (*model.User, error)
 
-	Get(ctx context.Context, id int) (*model.User, error)
+	GetUsers(ctx context.Context, arg ...func(*gorm.DB)) ([]*model.User, error)
+
+	Get(ctx context.Context, id int64) (*model.User, error)
 
 	GetByUsername(ctx context.Context, username string) (*model.User, error)
 }
@@ -19,11 +21,11 @@ type IUserRepository interface {
 var _ IUserRepository = (*UserRepository)(nil)
 
 type UserRepository struct {
-	repo.Repo[model.User]
+	gormrepo.Repo[model.User]
 }
 
 func NewUserRepository(db *gorm.DB) *UserRepository {
-	return &UserRepository{Repo: repo.NewRepo[model.User](db)}
+	return &UserRepository{Repo: gormrepo.NewRepo[model.User](db)}
 }
 
 func (u *UserRepository) Create(ctx context.Context, user *model.User) (*model.User, error) {
@@ -35,7 +37,16 @@ func (u *UserRepository) Create(ctx context.Context, user *model.User) (*model.U
 	return user, nil
 }
 
-func (u *UserRepository) Get(ctx context.Context, id int) (*model.User, error) {
+func (u *UserRepository) GetUsers(ctx context.Context, arg ...func(*gorm.DB)) ([]*model.User, error) {
+	users, err := u.FindAll(ctx, arg...)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
+func (u *UserRepository) Get(ctx context.Context, id int64) (*model.User, error) {
 	user, err := u.Repo.FindById(ctx, id)
 	if err != nil {
 		log.Printf("Не удалось получить пользователя: %s", err)

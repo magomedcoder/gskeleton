@@ -3,7 +3,7 @@ package entity
 import "strings"
 
 type User struct {
-	Id       int
+	Id       int64
 	Name     string
 	Email    string
 	Password string

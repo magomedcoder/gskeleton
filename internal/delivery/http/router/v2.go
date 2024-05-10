@@ -15,6 +15,7 @@ func newV2(r *gin.Engine, h *handler.Handler, m *middleware.Middleware) *gin.Eng
 	{
 		user := v2.Group("/users").Use(authorize)
 		{
+			user.POST("", core.GinHandlerFunc(h.V2.User.Create))
 			user.GET("", core.GinHandlerFunc(h.V2.User.List))
 			user.GET("/:id", core.GinHandlerFunc(h.V2.User.Get))
 		}

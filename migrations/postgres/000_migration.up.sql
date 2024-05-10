@@ -1,4 +1,4 @@
--- create database gskeleton;
+create database gskeleton;
 
 create table users
 (

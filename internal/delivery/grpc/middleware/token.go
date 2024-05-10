@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/magomedcoder/gskeleton/internal/config"
-	"github.com/magomedcoder/gskeleton/internal/model"
+	"github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/model"
 	"google.golang.org/grpc/metadata"
 	"time"
 )
@@ -24,8 +24,8 @@ func NewTokenMiddleware(
 }
 
 type UserInfo struct {
+	Id       int64  `json:"id"`
 	Username string `json:"username"`
-	Id       int    `json:"id"`
 }
 
 type UserClaims struct {
@@ -39,7 +39,7 @@ func (t *TokenMiddleware) CreateToken(user *model.User) (string, error) {
 			ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
 			Issuer:    "github.com/magomedcoder/gskeleton",
 		},
-		UserInfo{user.Username, user.Id},
+		UserInfo{user.Id, user.Username},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

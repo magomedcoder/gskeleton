@@ -7,8 +7,8 @@ import (
 	v2 "github.com/magomedcoder/gskeleton/internal/delivery/http/handler/v2"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/middleware"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/router"
+	"github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/repository"
 	"github.com/magomedcoder/gskeleton/internal/provider"
-	"github.com/magomedcoder/gskeleton/internal/repository"
 	"github.com/magomedcoder/gskeleton/internal/usecase"
 	"github.com/magomedcoder/gskeleton/test"
 	"github.com/stretchr/testify/assert"
@@ -21,7 +21,7 @@ func SetupRouter() *gin.Engine {
 	db := provider.NewPostgresDB(test.GetConfig())
 	userRepository := repository.NewUserRepository(db)
 	userUseCase := &usecase.UserUseCase{
-		UserRepo: userRepository,
+		PostgresUserRepo: userRepository,
 	}
 	user := v1.NewUserHandler(userUseCase)
 	v1V1 := &v1.V1{

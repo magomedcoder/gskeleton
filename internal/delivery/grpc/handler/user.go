@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/magomedcoder/gskeleton/api/grpc/pb"
 	"github.com/magomedcoder/gskeleton/internal/delivery/grpc/middleware"
-	"github.com/magomedcoder/gskeleton/internal/model"
+	"github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/model"
 	"github.com/magomedcoder/gskeleton/internal/usecase"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
@@ -26,7 +26,7 @@ func (u *UserHandler) Get(ctx context.Context, in *pb.Get_Request) (*pb.Get_Resp
 
 	return &pb.Get_Response{
 		Username: user.Username,
-		Id:       int32(user.Id),
+		Id:       user.Id,
 		CreateAt: user.CreatedAt.Local().String(),
 	}, nil
 }

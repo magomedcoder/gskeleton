@@ -9,16 +9,11 @@ import (
 )
 
 func NewPostgresDB(conf *config.Config) *gorm.DB {
-	gormConfig := &gorm.Config{}
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN: conf.Postgres.GetDsn(),
-	}), gormConfig)
+	}), &gorm.Config{})
 	if err != nil {
-		panic(fmt.Errorf("ошибка подключения к postgres: %v", err))
-	}
-
-	if db.Error != nil {
-		panic(fmt.Errorf("ошибка базы данных: %v", err))
+		panic(fmt.Errorf("не удалось подключиться к серверу postgres: %v", err))
 	}
 
 	sqlDB, _ := db.DB()

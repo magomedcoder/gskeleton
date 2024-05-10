@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"fmt"
 	"github.com/magomedcoder/gskeleton/pkg/jsonutil"
 	"net/http"
@@ -12,19 +13,16 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-var trans ut.Translator
-
-var MarshalOptions = protojson.MarshalOptions{
-	UseProtoNames:   true,
-	EmitUnpopulated: true,
-}
-
 type GinContext struct {
 	Context *gin.Context
 }
 
 func NewGinContext(ctx *gin.Context) *GinContext {
 	return &GinContext{ctx}
+}
+
+func (g *GinContext) Ctx() context.Context {
+	return g.Context.Request.Context()
 }
 
 func (g *GinContext) Error(error string) error {
@@ -52,18 +50,10 @@ func (g *GinContext) Success(data any) error {
 	return nil
 }
 
-func Translate(err error) string {
-	if errs, ok := err.(validator.ValidationErrors); ok {
-		for _, err := range errs {
-			return err.Translate(trans)
-		}
-	}
-
-	return err.Error()
-}
-
 func (g *GinContext) InvalidParams(message any) error {
-	resp := &Response{Message: "Недопустимые параметры"}
+	resp := &Response{
+		Message: "Недопустимые параметры",
+	}
 
 	switch msg := message.(type) {
 	case error:
@@ -80,7 +70,9 @@ func (g *GinContext) InvalidParams(message any) error {
 }
 
 func (g *GinContext) ErrorBusiness(message any) error {
-	resp := &Response{Message: "Недопустимые параметры"}
+	resp := &Response{
+		Message: "Недопустимые параметры",
+	}
 
 	switch msg := message.(type) {
 	case error:
@@ -94,4 +86,33 @@ func (g *GinContext) ErrorBusiness(message any) error {
 	g.Context.AbortWithStatusJSON(http.StatusBadRequest, resp)
 
 	return nil
+}
+
+var trans ut.Translator
+
+var MarshalOptions = protojson.MarshalOptions{
+	UseProtoNames:   true,
+	EmitUnpopulated: true,
+}
+
+func Translate(err error) string {
+	if errs, ok := err.(validator.ValidationErrors); ok {
+		for _, err := range errs {
+			return err.Translate(trans)
+		}
+	}
+
+	return err.Error()
+}
+
+func GinHandlerFunc(fn func(ctx *GinContext) error) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if err := fn(NewGinContext(c)); err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, &Response{
+				Message: err.Error(),
+			})
+
+			return
+		}
+	}
 }

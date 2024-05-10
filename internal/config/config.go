@@ -12,6 +12,7 @@ import (
 type Config struct {
 	Server   *Server   `yaml:"server"`
 	Postgres *Postgres `yaml:"postgres"`
+	Redis    *Redis    `yaml:"redis"`
 	Jwt      *Jwt      `yaml:"jwt"`
 	sid      string
 }

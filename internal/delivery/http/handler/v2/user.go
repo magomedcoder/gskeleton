@@ -1,8 +1,12 @@
 package v2
 
 import (
+	"fmt"
+	"github.com/magomedcoder/gskeleton/internal/domain/entity"
 	"github.com/magomedcoder/gskeleton/internal/usecase"
 	"github.com/magomedcoder/gskeleton/pkg/core"
+	"github.com/magomedcoder/gskeleton/pkg/db/gormrepo"
+	"gorm.io/gorm"
 	"strconv"
 )
 
@@ -18,22 +22,58 @@ func NewUserHandler(
 	}
 }
 
-func (u *User) List(ctx *core.GinContext) error {
+func (u *User) Create(ctx *core.GinContext) error {
 
-	return nil
+	return ctx.Success(Get{})
+}
+
+type ListResponse struct {
+	Total int64          `json:"total"`
+	Items []*entity.User `json:"items"`
+}
+
+func (u *User) List(ctx *core.GinContext) error {
+	var params entity.Pagination
+	if err := ctx.Context.ShouldBindQuery(&params); err != nil {
+		fmt.Println(err)
+	}
+
+	var count int64
+	users, err := u.UserUseCase.GetUsers(ctx.Ctx(), func(db *gorm.DB) {
+		db.Scopes(gormrepo.Paginate(&gormrepo.Pagination{
+			Page:     params.Page,
+			PageSize: params.Limit,
+		})).Count(&count)
+	})
+	if err != nil {
+		return ctx.ErrorBusiness("Пользователи не найдены")
+	}
+
+	items := make([]*entity.User, 0)
+	for _, item := range users {
+		items = append(items, &entity.User{
+			Id:   item.Id,
+			Name: item.Name,
+		})
+	}
+
+	return ctx.Success(ListResponse{
+		Total: count,
+		Items: items,
+	})
 }
 
 type Get struct {
-	Id int `json:"id"`
+	Id int64 `json:"id"`
 }
 
 func (u *User) Get(ctx *core.GinContext) error {
-	id, err := strconv.Atoi(ctx.Context.Param("id"))
+	id, err := strconv.ParseInt(ctx.Context.Param("id"), 10, 64)
 	if err != nil {
 		return ctx.ErrorBusiness("Неверный id")
 	}
 
-	user, _ := u.UserUseCase.GetUserById(ctx.Context, id)
+	user, _ := u.UserUseCase.GetUserById(ctx.Ctx(), id)
 	if user.Id == 0 {
 		return ctx.ErrorBusiness("Пользователь не найден")
 	}
