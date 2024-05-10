@@ -3,19 +3,22 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"github.com/magomedcoder/gskeleton/internal/model"
-	"github.com/magomedcoder/gskeleton/internal/repository"
+	postgresModel "github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/model"
+	postgresRepo "github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/repository"
+	redisModel "github.com/magomedcoder/gskeleton/internal/infrastructure/redis/model"
+	redisRepo "github.com/magomedcoder/gskeleton/internal/infrastructure/redis/repository"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"time"
 )
 
 type IUserUseCase interface {
-	Create(ctx context.Context, userModel *model.User) (*model.User, error)
+	Create(ctx context.Context, userModel *postgresModel.User) (*postgresModel.User, error)
 
-	GetUserById(ctx context.Context, id int) (*model.User, error)
+	GetUserById(ctx context.Context, id int) (*postgresModel.User, error)
 
-	GetUserByUsername(ctx context.Context, username string) (*model.User, error)
+	GetUserByUsername(ctx context.Context, username string) (*postgresModel.User, error)
 
 	HashPassword(password string) (string, error)
 
@@ -25,7 +28,8 @@ type IUserUseCase interface {
 var _ IUserUseCase = (*UserUseCase)(nil)
 
 type UserUseCase struct {
-	UserRepo repository.IUserRepository
+	PostgresUserRepo         postgresRepo.IUserRepository
+	RedisUserCacheRepository redisRepo.IUserCacheRepository
 }
 
 func (u *UserUseCase) HashPassword(password string) (string, error) {
@@ -38,8 +42,8 @@ func (u *UserUseCase) CheckPasswordHash(password, hash string) (bool, error) {
 	return err == nil, err
 }
 
-func (u *UserUseCase) Create(ctx context.Context, userModel *model.User) (*model.User, error) {
-	user, err := u.UserRepo.GetByUsername(ctx, userModel.Username)
+func (u *UserUseCase) Create(ctx context.Context, userModel *postgresModel.User) (*postgresModel.User, error) {
+	user, err := u.PostgresUserRepo.GetByUsername(ctx, userModel.Username)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("Не удалось создать пользователя: %s", user.Username))
 	}
@@ -48,16 +52,23 @@ func (u *UserUseCase) Create(ctx context.Context, userModel *model.User) (*model
 		return nil, status.Error(codes.AlreadyExists, fmt.Sprintf("Пользователь %s уже существует", user.Username))
 	}
 
-	createdUser, err := u.UserRepo.Create(ctx, userModel)
+	createdUser, err := u.PostgresUserRepo.Create(ctx, userModel)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Не удалось создать пользователя")
+	}
+
+	if err := u.RedisUserCacheRepository.Set(ctx, "user_cache", redisModel.UserCache{
+		Id:       createdUser.Id,
+		Username: createdUser.Username,
+	}, int64(time.Hour.Seconds())); err != nil {
+		fmt.Printf("не удалось кэшировать пользователя: %v\n", err)
 	}
 
 	return createdUser, nil
 }
 
-func (u *UserUseCase) GetUserById(ctx context.Context, id int) (*model.User, error) {
-	user, err := u.UserRepo.Get(ctx, id)
+func (u *UserUseCase) GetUserById(ctx context.Context, id int) (*postgresModel.User, error) {
+	user, err := u.PostgresUserRepo.Get(ctx, id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("Не удалось получить пользователя: %v", id))
 	}
@@ -65,8 +76,8 @@ func (u *UserUseCase) GetUserById(ctx context.Context, id int) (*model.User, err
 	return user, nil
 }
 
-func (u *UserUseCase) GetUserByUsername(ctx context.Context, username string) (*model.User, error) {
-	user, err := u.UserRepo.GetByUsername(ctx, username)
+func (u *UserUseCase) GetUserByUsername(ctx context.Context, username string) (*postgresModel.User, error) {
+	user, err := u.PostgresUserRepo.GetByUsername(ctx, username)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("Не удалось получить пользователя: %s", username))
 	}

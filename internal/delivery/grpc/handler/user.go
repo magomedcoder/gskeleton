@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/magomedcoder/gskeleton/api/grpc/pb"
 	"github.com/magomedcoder/gskeleton/internal/delivery/grpc/middleware"
-	"github.com/magomedcoder/gskeleton/internal/model"
+	"github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/model"
 	"github.com/magomedcoder/gskeleton/internal/usecase"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"

@@ -12,6 +12,12 @@ import (
 func NewRouter(h *handler.Handler, m *middleware.Middleware) *gin.Engine {
 	r := gin.New()
 
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, core.Response{
+			Message: "v1, v2",
+		})
+	})
+
 	// V1
 	newV1(r, h, m)
 

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/magomedcoder/gskeleton/internal/config"
-	"github.com/magomedcoder/gskeleton/internal/model"
+	"github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/model"
 	"google.golang.org/grpc/metadata"
 	"time"
 )

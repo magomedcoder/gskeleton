@@ -23,6 +23,8 @@ COPY . ./
 
 RUN make install
 
+RUN go mod tidy
+
 RUN make build
 
 FROM alpine:3.19

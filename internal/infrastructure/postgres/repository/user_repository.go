@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"github.com/magomedcoder/gskeleton/internal/model"
+	"github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/model"
 	"github.com/magomedcoder/gskeleton/pkg/repo"
 	"gorm.io/gorm"
 	"log"
