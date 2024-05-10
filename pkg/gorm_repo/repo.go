@@ -1,4 +1,4 @@
-package repo
+package gorm_repo
 
 import (
 	"context"
@@ -18,8 +18,49 @@ func NewRepo[T ITable](db *gorm.DB) Repo[T] {
 	return Repo[T]{Db: db}
 }
 
+func (r *Repo[T]) BaseModel(ctx context.Context, arg ...func(*gorm.DB)) *gorm.DB {
+	bd := r.Model(context.Background())
+	for _, fn := range arg {
+		fn(bd)
+	}
+
+	return bd
+}
+
 func (r *Repo[T]) Model(ctx context.Context) *gorm.DB {
 	return r.Db.WithContext(ctx).Model(r.model)
+}
+
+func (r *Repo[T]) Create(ctx context.Context, data *T) error {
+	return r.Db.WithContext(ctx).Create(data).Error
+}
+
+func (r *Repo[T]) BatchCreate(ctx context.Context, data []*T) error {
+	return r.Db.WithContext(ctx).Create(data).Error
+}
+
+func (r *Repo[T]) Txx(ctx context.Context, fc func(tx *gorm.DB) error) error {
+	return r.Db.WithContext(ctx).Transaction(fc)
+}
+
+func (r *Repo[T]) SelectFindById(ctx context.Context, where string, id int64) (*T, error) {
+	var item *T
+	err := r.Db.WithContext(context.Background()).Select(where).First(&item, id).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return item, nil
+}
+
+func (r *Repo[T]) SelectFindByWhere(ctx context.Context, sel string, where string, args ...interface{}) (*T, error) {
+	var item *T
+	err := r.Db.WithContext(context.Background()).Select(sel).Where(where, args...).First(&item).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return item, nil
 }
 
 func (r *Repo[T]) FindById(ctx context.Context, id int) (*T, error) {
@@ -57,8 +98,8 @@ func (r *Repo[T]) FindAll(ctx context.Context, arg ...func(*gorm.DB)) ([]*T, err
 
 func (r *Repo[T]) FindByWhere(ctx context.Context, where string, args ...any) (*T, error) {
 	var item *T
-	err := r.Db.WithContext(ctx).Where(where, args...).First(&item).Error
-	if err != nil {
+
+	if err := r.Db.WithContext(ctx).Where(where, args...).First(&item).Error; err != nil {
 		return nil, err
 	}
 
@@ -67,18 +108,29 @@ func (r *Repo[T]) FindByWhere(ctx context.Context, where string, args ...any) (*
 
 func (r *Repo[T]) QueryCount(ctx context.Context, where string, args ...any) (int64, error) {
 	var count int64
-	err := r.Model(ctx).Where(where, args...).Count(&count).Error
-	if err != nil {
+	if err := r.Model(ctx).Where(where, args...).Count(&count).Error; err != nil {
 		return 0, err
 	}
 
 	return count, nil
 }
 
+func (r *Repo[T]) CustomFind(ctx context.Context, arg ...func(*gorm.DB)) (*T, error) {
+	bd := r.Model(ctx)
+	for _, fn := range arg {
+		fn(bd)
+	}
+
+	var item *T
+	if err := bd.Find(&item).Error; err != nil {
+		return nil, err
+	}
+	return item, nil
+}
+
 func (r *Repo[T]) QueryExist(ctx context.Context, where string, args ...any) (bool, error) {
 	var count int64
-	err := r.Model(ctx).Select("1").Where(where, args...).Limit(1).Scan(&count).Error
-	if err != nil {
+	if err := r.Model(ctx).Select("1").Where(where, args...).Limit(1).Scan(&count).Error; err != nil {
 		return false, err
 	}
 
@@ -97,14 +149,7 @@ func (r *Repo[T]) UpdateWhere(ctx context.Context, data map[string]any, where st
 	return res.RowsAffected, res.Error
 }
 
-func (r *Repo[T]) Create(ctx context.Context, data *T) error {
-	return r.Db.WithContext(ctx).Create(data).Error
-}
-
-func (r *Repo[T]) BatchCreate(ctx context.Context, data []*T) error {
-	return r.Db.WithContext(ctx).Create(data).Error
-}
-
-func (r *Repo[T]) Txx(ctx context.Context, fc func(tx *gorm.DB) error) error {
-	return r.Db.WithContext(ctx).Transaction(fc)
+func (r *Repo[T]) DeleteWhere(ctx context.Context, where string, args ...interface{}) error {
+	res := r.Model(context.Background()).Where(where, args...).Delete(r.model)
+	return res.Error
 }

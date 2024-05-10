@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/model"
-	"github.com/magomedcoder/gskeleton/pkg/repo"
+	gormRepo "github.com/magomedcoder/gskeleton/pkg/gorm_repo"
 	"gorm.io/gorm"
 	"log"
 )
@@ -19,11 +19,11 @@ type IUserRepository interface {
 var _ IUserRepository = (*UserRepository)(nil)
 
 type UserRepository struct {
-	repo.Repo[model.User]
+	gormRepo.Repo[model.User]
 }
 
 func NewUserRepository(db *gorm.DB) *UserRepository {
-	return &UserRepository{Repo: repo.NewRepo[model.User](db)}
+	return &UserRepository{Repo: gormRepo.NewRepo[model.User](db)}
 }
 
 func (u *UserRepository) Create(ctx context.Context, user *model.User) (*model.User, error) {
