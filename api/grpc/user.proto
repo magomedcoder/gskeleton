@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "github.com/magomedcoder/gskeleton/pkg/pb_generated/user";
+
+message Create {
+    message Request {
+        string username = 1;
+        string password = 2;
+    }
+
+    message Response {
+        bool success = 1;
+    }
+}
+
+message Get {
+    message Request {
+        string username = 1;
+    }
+
+    message Response {
+        int32 id = 1;
+        string username = 2;
+        string createAt = 3;
+    }
+}
+
+service UserService {
+    rpc Create(Create.Request) returns (Create.Response) {}
+    rpc Get(Get.Request) returns (Get.Response) {}
+}

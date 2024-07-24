@@ -6,39 +6,55 @@ package main
 import (
 	"github.com/google/wire"
 	"github.com/magomedcoder/gskeleton/internal/config"
-	"github.com/magomedcoder/gskeleton/internal/repository/repo"
+	"github.com/magomedcoder/gskeleton/internal/provider"
+	"github.com/magomedcoder/gskeleton/internal/repository"
+	userRepo "github.com/magomedcoder/gskeleton/internal/repository/user/repo"
 	"github.com/magomedcoder/gskeleton/internal/service"
+	userService "github.com/magomedcoder/gskeleton/internal/service/user"
 	"github.com/magomedcoder/gskeleton/internal/transport/grpc/handler"
 	"github.com/magomedcoder/gskeleton/internal/transport/grpc/middleware"
-	"gorm.io/gorm"
+	"github.com/magomedcoder/gskeleton/internal/transport/grpc/router"
 )
 
-func InitializeUserRepository(dao *gorm.DB) *repo.UserRepository {
-	wire.Build(wire.NewSet(wire.Struct(new(repo.UserRepositoryOpts), "*"), repo.NewUserRepository))
-	return &repo.UserRepository{}
+type Provider struct {
+	Server provider.IServer
+	//  UserRepository repository.IUserRepository
+	//  UserService    service.IUserService
 }
 
-func InitializeUserService(ur *repo.UserRepository) *service.UserService {
-	wire.Build(wire.NewSet(wire.Struct(new(service.UserServiceOpts), "*"), service.NewUserService))
-	return &service.UserService{}
-}
+var newSet = wire.NewSet(
+	wire.Struct(new(Provider), "*"),
 
-func InitializeUserHandler(us *service.UserService, as *middleware.AuthService) *handler.UserHandler {
-	wire.Build(wire.NewSet(wire.Struct(new(handler.UserServerOpts), "*"), handler.NewUserHandler))
-	return &handler.UserHandler{}
-}
+	wire.Bind(new(repository.IUserRepository), new(*userRepo.UserRepository)),
+	wire.Bind(new(service.IUserService), new(*userService.UserService)),
 
-func InitializeAuthService(th *middleware.TokenHandler) *middleware.AuthService {
-	wire.Build(wire.NewSet(wire.Struct(new(middleware.AuthServiceOpts), "*"), middleware.NewAuthService))
-	return &middleware.AuthService{}
-}
+	//wire.Struct(new(userRepo.UserRepository), "*"),
+	//wire.Struct(new(userService.UserService), "*"),
+	//wire.Struct(new(middleware.TokenMiddleware), "*"),
+	//wire.Struct(new(middleware.AuthMiddleware), "*"),
+	//wire.Struct(new(handler.AuthHandler), "*"),
+	//wire.Struct(new(handler.UserHandler), "*"),
+	//wire.Struct(new(router.GrpcMethodService), "*"),
+	//wire.Struct(new(provider.GrpcServer), "*"),
 
-func InitializeAuthHandler(as *middleware.AuthService, us *service.UserService, th *middleware.TokenHandler) *handler.AuthHandler {
-	wire.Build(wire.NewSet(wire.Struct(new(handler.AuthServerOptions), "*"), handler.NewAuthHandler))
-	return &handler.AuthHandler{}
-}
+	provider.NewPostgresDB,
 
-func InitializeTokenHandler(secret *config.Jwt) *middleware.TokenHandler {
-	wire.Build(wire.NewSet(wire.Struct(new(middleware.TokenHandlerOpts), "*"), middleware.NewTokenHandler))
-	return &middleware.TokenHandler{}
+	userRepo.NewUserRepository,
+	userService.NewUserService,
+
+	middleware.NewTokenMiddleware,
+	middleware.NewAuthMiddleware,
+
+	handler.NewAuthHandler,
+	handler.NewUserHandler,
+
+	router.NewGrpMethodsService,
+	//	middleware.RegisterGlobalService,
+
+	provider.NewGrpcServer,
+)
+
+func Initialize(config *config.Config) (Provider, error) {
+	wire.Build(newSet)
+	return Provider{}, nil
 }

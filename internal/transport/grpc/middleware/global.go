@@ -19,7 +19,7 @@ var (
 	GrpcMethodsServiceKey = GlobalServiceKey("grpcMethodsService")
 
 	globalServicesMap = map[reflect.Type]GlobalServiceKey{
-		reflect.TypeOf(&AuthService{}):              AuthServiceKey,
+		reflect.TypeOf(&AuthMiddleware{}):           AuthServiceKey,
 		reflect.TypeOf(&router.GrpcMethodService{}): GrpcMethodsServiceKey,
 	}
 )
@@ -49,7 +49,7 @@ func AuthorizationServerInterceptor(ctx context.Context, req interface{}, info *
 		return handler(ctx, req)
 	}
 
-	authService := GetGlobalService(AuthServiceKey).(*AuthService)
+	authService := GetGlobalService(AuthServiceKey).(*AuthMiddleware)
 	_, err := authService.ValidateToken(ctx)
 	if err != nil {
 		return nil, err

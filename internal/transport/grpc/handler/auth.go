@@ -2,44 +2,50 @@ package handler
 
 import (
 	"context"
-	"github.com/magomedcoder/gskeleton/api/grpc/pb"
 	"github.com/magomedcoder/gskeleton/internal/service"
 	"github.com/magomedcoder/gskeleton/internal/transport/grpc/middleware"
+	authPb "github.com/magomedcoder/gskeleton/pkg/pb_generated/auth"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/status"
 )
 
 type AuthHandler struct {
-	pb.UnimplementedAuthServiceServer
-	opts AuthServerOptions
+	authPb.UnimplementedAuthServiceServer
+	AuthMiddleware  *middleware.AuthMiddleware
+	TokenMiddleware *middleware.TokenMiddleware
+	UserService     service.IUserService
 }
 
-type AuthServerOptions struct {
-	AuthService  *middleware.AuthService
-	UserService  *service.UserService
-	TokenHandler *middleware.TokenHandler
+func NewAuthHandler(
+	authMiddleware *middleware.AuthMiddleware,
+	tokenMiddleware *middleware.TokenMiddleware,
+	userService service.IUserService,
+) *AuthHandler {
+	return &AuthHandler{
+		AuthMiddleware:  authMiddleware,
+		TokenMiddleware: tokenMiddleware,
+		UserService:     userService,
+	}
 }
 
-func NewAuthHandler(opts AuthServerOptions) *AuthHandler {
-	return &AuthHandler{opts: opts}
-}
-
-func (a *AuthHandler) Login(ctx context.Context, in *pb.Login_Request) (*pb.Login_Response, error) {
-	user, err := a.opts.UserService.GetUserByUsername(in.Username)
+func (a *AuthHandler) Login(ctx context.Context, in *authPb.Login_Request) (*authPb.Login_Response, error) {
+	user, err := a.UserService.GetUserByUsername(in.Username)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "Пользователь не найден")
 	}
 
-	if _, err := a.opts.UserService.CheckPasswordHash(in.Password, user.Password); err != nil {
+	if _, err := a.UserService.CheckPasswordHash(in.Password, user.Password); err != nil {
 		return nil, status.Error(codes.Unauthenticated, "Неверный пароль")
 	}
 
-	token, err := a.opts.TokenHandler.CreateToken(user)
+	token, err := a.TokenMiddleware.CreateToken(user)
 	if err != nil {
 		grpclog.Errorf("Ошибка создания токена: %v", err)
 		return nil, status.Error(codes.FailedPrecondition, "ошибка создания токена")
 	}
 
-	return &pb.Login_Response{AccessToken: token}, nil
+	return &authPb.Login_Response{
+		AccessToken: token,
+	}, nil
 }

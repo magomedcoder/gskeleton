@@ -1,57 +1,45 @@
 package main
 
 import (
-	"context"
 	"github.com/magomedcoder/gskeleton/internal/config"
 	"github.com/magomedcoder/gskeleton/internal/provider"
+	_userRepo "github.com/magomedcoder/gskeleton/internal/repository/user/repo"
+	_userService "github.com/magomedcoder/gskeleton/internal/service/user"
+	"github.com/magomedcoder/gskeleton/internal/transport/grpc/handler"
 	"github.com/magomedcoder/gskeleton/internal/transport/grpc/middleware"
 	"github.com/magomedcoder/gskeleton/internal/transport/grpc/router"
-	"golang.org/x/sync/errgroup"
 	"log"
 )
 
 func main() {
-	ctx := context.Background()
-
 	conf, err := config.ReadConfig("./configs/main.yaml")
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
 
-	routesServices := router.NewGrpMethodsService()
-
+	//srv, _ := Initialize(conf)
+	//if err != nil {
+	//	os.Exit(2)
+	//}
+	//
+	//srv.Server.Start()
 	db, err := provider.NewPostgresDB(conf)
 	if err != nil {
-
+		log.Fatalf("%v", err)
 	}
 
-	userRepository := InitializeUserRepository(db)
+	userRepository := _userRepo.NewUserRepository(db)
+	userService := _userService.NewUserService(userRepository)
 
-	tokenHandler := InitializeTokenHandler(conf.Jwt)
+	tokenMiddleware := middleware.NewTokenMiddleware(conf)
+	authMiddleware := middleware.NewAuthMiddleware(tokenMiddleware)
 
-	userService := InitializeUserService(userRepository)
-	authService := InitializeAuthService(tokenHandler)
+	authHandler := handler.NewAuthHandler(authMiddleware, tokenMiddleware, userService)
+	userHandler := handler.NewUserHandler(authMiddleware, userService)
 
-	userHandler := InitializeUserHandler(userService, authService)
-	authHandler := InitializeAuthHandler(authService, userService, tokenHandler)
+	routesServices := router.NewGrpMethodsService()
 
-	ctx = middleware.RegisterGlobalService(ctx, authService)
-	ctx = middleware.RegisterGlobalService(ctx, routesServices)
+	srv := provider.NewGrpcServer(conf, authHandler, userHandler, authMiddleware, routesServices)
 
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	g, _ := errgroup.WithContext(ctx)
-	g.Go(func() error {
-		srv := provider.NewGrpcServer(conf, userHandler, authHandler)
-		log.Printf(
-			"gRPC json-rpc-server running at %s://%s:%s \n",
-			conf.Server.Grpc.GrpcProtocol,
-			conf.Server.Grpc.Host,
-			conf.Server.Grpc.GrpcPort,
-		)
-		return srv.Serve()
-	})
-	log.Fatal(g.Wait())
-
+	srv.Start()
 }

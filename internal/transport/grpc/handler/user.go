@@ -2,10 +2,11 @@ package handler
 
 import (
 	"context"
-	"github.com/magomedcoder/gskeleton/api/grpc/pb"
-	"github.com/magomedcoder/gskeleton/internal/repository/model"
+	"github.com/magomedcoder/gskeleton/internal/repository/user/entity"
 	"github.com/magomedcoder/gskeleton/internal/service"
 	"github.com/magomedcoder/gskeleton/internal/transport/grpc/middleware"
+	"github.com/magomedcoder/gskeleton/pkg/pb_generated/user"
+	userPb "github.com/magomedcoder/gskeleton/pkg/pb_generated/user"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -13,26 +14,28 @@ import (
 )
 
 type UserHandler struct {
-	pb.UnimplementedUserServiceServer
-	opts *UserServerOpts
+	user.UnimplementedUserServiceServer
+	UserService    service.IUserService
+	AuthMiddleware *middleware.AuthMiddleware
 }
 
-type UserServerOpts struct {
-	UserService *service.UserService
-	AuthService *middleware.AuthService
+func NewUserHandler(
+	authMiddleware *middleware.AuthMiddleware,
+	userService service.IUserService,
+) *UserHandler {
+	return &UserHandler{
+		AuthMiddleware: authMiddleware,
+		UserService:    userService,
+	}
 }
 
-func NewUserHandler(opts *UserServerOpts) *UserHandler {
-	return &UserHandler{opts: opts}
-}
-
-func (u *UserHandler) GetUserInfo(ctx context.Context, in *pb.GetUserInfoRequest) (*pb.GetUserInfoResponse, error) {
-	user, _ := u.opts.UserService.GetUserByUsername(in.Username)
+func (u *UserHandler) Get(ctx context.Context, in *userPb.Get_Request) (*userPb.Get_Response, error) {
+	user, _ := u.UserService.GetUserByUsername(in.Username)
 	if user.Id == 0 {
 		return nil, status.Error(codes.NotFound, "Пользователь не найден")
 	}
 
-	return &pb.GetUserInfoResponse{
+	return &userPb.Get_Response{
 		Username: user.Username,
 		Id:       int32(user.Id),
 		CreateAt: user.CreatedAt.Local().String(),
@@ -44,21 +47,23 @@ func (u *UserHandler) HashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
-func (u *UserHandler) CreateUser(ctx context.Context, in *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
-	passwordHash, err := u.opts.UserService.HashPassword(in.Password)
+func (u *UserHandler) Create(ctx context.Context, in *userPb.Create_Request) (*userPb.Create_Response, error) {
+	passwordHash, err := u.UserService.HashPassword(in.Password)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Не удалось хешировать пароль")
 	}
 
-	user := model.User{
+	user := entity.User{
 		Username:  in.Username,
 		Password:  passwordHash,
 		CreatedAt: time.Now(),
 	}
 
-	if _, err = u.opts.UserService.CreateUser(user); err != nil {
+	if _, err = u.UserService.Create(user); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return &pb.CreateUserResponse{Success: true}, nil
+	return &userPb.Create_Response{
+		Success: true,
+	}, nil
 }

@@ -4,20 +4,20 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/magomedcoder/gskeleton/internal/config"
-	"github.com/magomedcoder/gskeleton/internal/repository/model"
+	"github.com/magomedcoder/gskeleton/internal/repository/user/entity"
 	"time"
 )
 
-type TokenHandlerOpts struct {
-	JwtConfig *config.Jwt
+type TokenMiddleware struct {
+	Conf *config.Config
 }
 
-type TokenHandler struct {
-	opts TokenHandlerOpts
-}
-
-func NewTokenHandler(opts TokenHandlerOpts) *TokenHandler {
-	return &TokenHandler{opts: opts}
+func NewTokenMiddleware(
+	conf *config.Config,
+) *TokenMiddleware {
+	return &TokenMiddleware{
+		Conf: conf,
+	}
 }
 
 type UserInfo struct {
@@ -30,7 +30,7 @@ type UserClaims struct {
 	UserInfo
 }
 
-func (t *TokenHandler) CreateToken(user *model.User) (string, error) {
+func (t *TokenMiddleware) CreateToken(user *entity.User) (string, error) {
 	claims := &UserClaims{
 		&jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
@@ -40,16 +40,16 @@ func (t *TokenHandler) CreateToken(user *model.User) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(t.opts.JwtConfig.Secret))
+	return token.SignedString([]byte(t.Conf.Jwt.Secret))
 }
 
-func (t *TokenHandler) ParseToken(tokenString string) (*UserClaims, error) {
+func (t *TokenMiddleware) ParseToken(tokenString string) (*UserClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Неожиданный метод подписи: %v", token.Header["alg"])
 		}
 
-		return []byte(t.opts.JwtConfig.Secret), nil
+		return []byte(t.Conf.Jwt.Secret), nil
 	})
 
 	if err != nil {

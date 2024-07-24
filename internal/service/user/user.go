@@ -1,24 +1,27 @@
-package service
+package user
 
 import (
 	"fmt"
-	"github.com/magomedcoder/gskeleton/internal/repository/model"
-	"github.com/magomedcoder/gskeleton/internal/repository/repo"
+	"github.com/magomedcoder/gskeleton/internal/repository"
+	"github.com/magomedcoder/gskeleton/internal/repository/user/entity"
+	def "github.com/magomedcoder/gskeleton/internal/service"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
+var _ def.IUserService = (*UserService)(nil)
+
 type UserService struct {
-	opts *UserServiceOpts
+	UserRepo repository.IUserRepository
 }
 
-type UserServiceOpts struct {
-	UserRepo *repo.UserRepository
-}
-
-func NewUserService(opts *UserServiceOpts) *UserService {
-	return &UserService{opts: opts}
+func NewUserService(
+	userRepo repository.IUserRepository,
+) *UserService {
+	return &UserService{
+		UserRepo: userRepo,
+	}
 }
 
 func (s *UserService) HashPassword(password string) (string, error) {
@@ -31,17 +34,8 @@ func (s *UserService) CheckPasswordHash(password, hash string) (bool, error) {
 	return err == nil, err
 }
 
-func (s *UserService) GetUserByUsername(username string) (*model.User, error) {
-	user, err := s.opts.UserRepo.GetByUsername(username)
-	if err != nil {
-		return nil, status.Error(codes.Internal, fmt.Sprintf("Не удалось получить пользователя: %s", username))
-	}
-
-	return user, nil
-}
-
-func (s *UserService) CreateUser(u model.User) (*model.User, error) {
-	user, err := s.opts.UserRepo.GetByUsername(u.Username)
+func (s *UserService) Create(u entity.User) (*entity.User, error) {
+	user, err := s.UserRepo.GetByUsername(u.Username)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("Не удалось создать пользователя: %s", u.Username))
 	}
@@ -50,10 +44,19 @@ func (s *UserService) CreateUser(u model.User) (*model.User, error) {
 		return nil, status.Error(codes.AlreadyExists, fmt.Sprintf("Пользователь %s уже существует", u.Username))
 	}
 
-	createdUser, err := s.opts.UserRepo.CreateUser(u)
+	createdUser, err := s.UserRepo.Create(u)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Не удалось создать пользователя")
 	}
 
 	return createdUser, nil
+}
+
+func (s *UserService) GetUserByUsername(username string) (*entity.User, error) {
+	user, err := s.UserRepo.GetByUsername(username)
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("Не удалось получить пользователя: %s", username))
+	}
+
+	return user, nil
 }

@@ -3,62 +3,95 @@
 ## Folder structure
 
 ```
-├── cmd
-│    ├── grpc
-│    │   ├── main.go
-│    │   ├── wire.go
-│    │   └── wire_gen.go
-│    └── json-rpc
-│        ├── main.go
-│        ├── wire.go
-│        └── wire_gen.go
-├── configs
-│   └── main.yaml
-├── internal
-│   ├── config
-│   │   ├── config.go
-│   │   ├── jwt.go
-│   │   ├── postgres.go
-│   │   └── server.go
-│   ├── provider
-│   │   ├── grpc_server.go
-│   │   ├── json_rpc_server.go
-│   │   └── postgres.go
-│   └── transport
-│   │   ├── model
+├─ api
+│   └─ grpc
+│       ├─ auth.proto
+│       └─ user.proto
+├─ cmd
+│   ├─ grpc
+│   │   ├─ main.go
+│   │   ├─ wire.go
+│   │   └─ wire_gen.go
+│   │
+│   └── json-rpc
+│        ├─ main.go
+│        ├─ wire.go
+│        └─ wire_gen.go
+│
+├─ configs
+│   └─ main.yaml
+│
+├─ internal
+│   ├─ config
+│   │   ├─ config.go
+│   │   ├─ jwt.go
+│   │   ├─ postgres.go
+│   │   └─ server.go
+│   │
+│   ├─ model
+│   │   └─ error.go
+│   │
+│   ├─ provider
+│   │   ├─ grpc.go
+│   │   ├─ json_rpc.go
+│   │   └─ postgres.go
+│   │
+│   ├─ repository
+│   │   ├─ user
+│   │   │   ├─ entity
+│   │   │   │   └─ user.go
+│   │   │   │
+│   │   │   └─ repo
+│   │   │       ├─ user.go
+│   │   │       ├─ user_create.go
+│   │   │       └─ user_get.go
+│   │   │
+│   │   └─ repository.go
+│   │
+│   ├─ service
+│   │   ├─ user
 │   │   │   └─ user.go
-│   │   └── repo
-│   │       └─ user.go
-│   └── transport
-│       ├── grpc
-│       │   ├── handler
-│       │   │   ├── auth.go
-│       │   │   └── user.go
-│       │   ├── middleware
-│       │   │   ├── auth.go
-│       │   │   ├── global.go
-│       │   │   └── token.go
-│       │   └── router
-│       │       └── methods.go
-│       └── json-rpc
-│           ├── handler
-│           │   ├── example.go
-│           │   └── handler.go
-│           └── router
-│               └── router.go
-├── pkg
-│   └── json-rpc-server
-│       ├── error.go
-│       ├── http.go
-│       ├── options.go
-│       ├── rpc.go
-│       ├── server.go
-│       └── transport.go
-├── .editorconfig
-├── .gitignore
-├── go.mod
-├── go.sum
-├── LICENSE
-├── Makefile
-└── README.md
+│   │   └─ postgres.go
+│   │
+│   └─ transport
+│       ├─ grpc
+│       │   ├─ handler
+│       │   │   ├─ auth.go
+│       │   │   └─ user.go
+│       │   │
+│       │   ├─ middleware
+│       │   │   ├─ auth.go
+│       │   │   ├─ global.go
+│       │   │   └─ token.go
+│       │   │
+│       │   └─ router
+│       │       └─ methods.go
+│       │
+│       └─ json-rpc
+│           ├─ handler
+│           │   ├─ example.go
+│           │   └─ handler.go
+│           │
+│           └─ router
+│               └─ router.go
+│
+├─ pkg
+│   └─ json-rpc-server
+│       ├─ error.go
+│       ├─ http.go
+│       ├─ options.go
+│       ├─ rpc.go
+│       ├─ server.go
+│       └─ transport.go
+│
+├─ test
+│   └─ rpc-call.http
+│
+├─ .editorconfig
+├─ .gitignore
+├─ go.mod
+├─ go.sum
+├─ LICENSE
+├─ Makefile
+└─ README.md
 ```

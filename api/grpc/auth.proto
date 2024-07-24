@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package auth;
 
-option go_package = "./pb";
+option go_package = "github.com/magomedcoder/gskeleton/pkg/pb_generated/auth";
 
 message Login {
     message Request {
