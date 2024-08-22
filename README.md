@@ -13,6 +13,11 @@
 │   │   ├─ wire.go
 │   │   └─ wire_gen.go
 │   │
+│   ├─ http
+│   │   ├─ main.go
+│   │   ├─ wire.go
+│   │   └─ wire_gen.go
+│   │
 │   └── json-rpc
 │        ├─ main.go
 │        ├─ wire.go
@@ -23,7 +28,7 @@
 │
 ├─ internal
 │   ├─ config
-│   │   ├─ config.go
+│   │   ├─ app.go
 │   │   ├─ jwt.go
 │   │   ├─ postgres.go
 │   │   └─ server.go
@@ -32,6 +37,7 @@
 │   │   └─ error.go
 │   │
 │   ├─ provider
+│   │   ├─ app.go
 │   │   ├─ grpc.go
 │   │   ├─ json_rpc.go
 │   │   └─ postgres.go
@@ -66,6 +72,21 @@
 │       │   │
 │       │   └─ router
 │       │       └─ methods.go
+│       ├─ http
+│       │   ├─ handler
+│       │   │   └─ v1
+│       │   │       ├─ example.go
+│       │   │       └─ handler.go
+│       │   │
+│       │   ├─ middleware
+│       │   │   ├─ auth.go
+│       │   │   └─ handler.go
+│       │   │
+│       │   ├─ router
+│       │   │   └─ methods.go
+│       │   │
+│       │   ├─ server.go
+│       │   └─ wire.go
 │       │
 │       └─ json-rpc
 │           ├─ handler
@@ -76,19 +97,33 @@
 │               └─ router.go
 │
 ├─ pkg
+│   ├─ jencrypt
+│   │   └─ encrypt.go
+│   │
+│   ├─ http-server
+│   │   ├─ context.go
+│   │   ├─ handler.go
+│   │   └─ response.go
+│   │
 │   └─ json-rpc-server
-│       ├─ error.go
-│       ├─ http.go
-│       ├─ options.go
-│       ├─ rpc.go
-│       ├─ server.go
-│       └─ transport.go
-│
+│   │   ├─ error.go
+│   │   ├─ http.go
+│   │   ├─ options.go
+│   │   ├─ rpc.go
+│   │   ├─ server.go
+│   │   └─ transport.go
+│   │
+│   ├─ jsonutil
+│   │   └─ json.go
+│   │
+│   └─ strutil
+│       └─ str.go
 ├─ test
 │   └─ rpc-call.http
 │
 ├─ .editorconfig
 ├─ .gitignore
+├─ docker-compose.yaml
 ├─ go.mod
 ├─ go.sum
 ├─ LICENSE

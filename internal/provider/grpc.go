@@ -3,12 +3,12 @@ package provider
 import (
 	"context"
 	"fmt"
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpcMiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/magomedcoder/gskeleton/internal/config"
 	"github.com/magomedcoder/gskeleton/internal/transport/grpc/middleware"
 	"github.com/magomedcoder/gskeleton/internal/transport/grpc/router"
-	"github.com/magomedcoder/gskeleton/pkg/pb_generated/auth"
-	pb2 "github.com/magomedcoder/gskeleton/pkg/pb_generated/user"
+	authPb "github.com/magomedcoder/gskeleton/pkg/pb_generated/auth"
+	userPb "github.com/magomedcoder/gskeleton/pkg/pb_generated/user"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
@@ -20,8 +20,8 @@ import (
 
 type GrpcServer struct {
 	Conf           *config.Config
-	AuthHandler    auth.AuthServiceServer
-	UserHandler    pb2.UserServiceServer
+	AuthHandler    authPb.AuthServiceServer
+	UserHandler    userPb.UserServiceServer
 	AuthMiddleware *middleware.AuthMiddleware
 	RoutesServices *router.GrpcMethodService
 }
@@ -33,8 +33,8 @@ type IServer interface {
 
 func NewGrpcServer(
 	conf *config.Config,
-	authHandler auth.AuthServiceServer,
-	userHandler pb2.UserServiceServer,
+	authHandler authPb.AuthServiceServer,
+	userHandler userPb.UserServiceServer,
 	authMiddleware *middleware.AuthMiddleware,
 	routesServices *router.GrpcMethodService,
 ) IServer {
@@ -59,13 +59,13 @@ func (g *GrpcServer) Serve() error {
 	grpcLog := grpclog.NewLoggerV2(os.Stdout, os.Stderr, os.Stderr)
 	grpclog.SetLoggerV2(grpcLog)
 
-	srv := grpc.NewServer(grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+	srv := grpc.NewServer(grpc.UnaryInterceptor(grpcMiddleware.ChainUnaryServer(
 		middleware.LoggingServerInterceptor,
 		middleware.AuthorizationServerInterceptor,
 	)))
 
-	pb2.RegisterUserServiceServer(srv, g.UserHandler)
-	auth.RegisterAuthServiceServer(srv, g.AuthHandler)
+	authPb.RegisterAuthServiceServer(srv, g.AuthHandler)
+	userPb.RegisterUserServiceServer(srv, g.UserHandler)
 
 	reflection.Register(srv)
 
@@ -77,7 +77,6 @@ func (g *GrpcServer) Serve() error {
 }
 
 func (g *GrpcServer) Start() {
-
 	ctx := context.Background()
 
 	ctx = middleware.RegisterGlobalService(ctx, g.AuthMiddleware)

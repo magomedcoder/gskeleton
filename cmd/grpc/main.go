@@ -23,10 +23,7 @@ func main() {
 	//}
 	//
 	//srv.Server.Start()
-	db, err := provider.NewPostgresDB(conf)
-	if err != nil {
-		log.Fatalf("%v", err)
-	}
+	db := provider.NewPostgresDB(conf)
 
 	userRepository := _userRepo.NewUserRepository(db)
 	userService := _userService.NewUserService(userRepository)

@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func NewPostgresDB(config *config.Config) (*gorm.DB, error) {
+func NewPostgresDB(config *config.Config) *gorm.DB {
 	dsn := fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s",
 		config.Postgresql.User,
@@ -17,10 +17,9 @@ func NewPostgresDB(config *config.Config) (*gorm.DB, error) {
 		config.Postgresql.Name,
 	)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-
 	if err != nil {
-		return nil, err
+		panic(fmt.Errorf("ошибка базы данных: %v", err))
 	}
 
-	return db, nil
+	return db
 }
