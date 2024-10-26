@@ -1,10 +1,13 @@
 package middleware
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/magomedcoder/gskeleton/internal/config"
 	"github.com/magomedcoder/gskeleton/internal/repository/user/entity"
+	"google.golang.org/grpc/metadata"
 	"time"
 )
 
@@ -34,7 +37,7 @@ func (t *TokenMiddleware) CreateToken(user *entity.User) (string, error) {
 	claims := &UserClaims{
 		&jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
-			Issuer:    "github.com/magomedcoder/gskeleton-grpc",
+			Issuer:    "github.com/magomedcoder/gskeleton",
 		},
 		UserInfo{user.Username, user.Id},
 	}
@@ -61,4 +64,18 @@ func (t *TokenMiddleware) ParseToken(tokenString string) (*UserClaims, error) {
 	}
 
 	return nil, err
+}
+
+func (t *TokenMiddleware) ValidateToken(ctx context.Context) (*UserClaims, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, errors.New("Не удалось получить метаданные")
+	}
+
+	token := md.Get("Authorization")
+	userClaims, err := t.ParseToken(token[len(token)-1])
+	if err != nil {
+		return nil, err
+	}
+	return userClaims, nil
 }

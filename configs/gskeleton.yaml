@@ -1,17 +1,17 @@
 server:
-  json_rpc:
+  http:
     port: 8000
   grpc:
     host: "127.0.0.1"
-    grpc_port: "50051"
+    grpc_port: 50051
     grpc_protocol: "tcp"
 
 postgresql:
-  host: xxx.xxx.xxx.xxx
+  host: 127.0.0.1
   port: 5432
-  user: xxxxxxxxxx
-  password: xxxxxxxxxx
-  database: xxxxxxxxxx
+  user: postgres
+  password: postgres
+  database: gskeleton
 
 jwt:
   secret: "secret"

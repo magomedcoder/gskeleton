@@ -2,9 +2,9 @@ package handler
 
 import (
 	"context"
+	authPb "github.com/magomedcoder/gskeleton/api/grpc/pb/auth"
 	"github.com/magomedcoder/gskeleton/internal/service"
 	"github.com/magomedcoder/gskeleton/internal/transport/grpc/middleware"
-	authPb "github.com/magomedcoder/gskeleton/pkg/pb_generated/auth"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/status"
@@ -12,18 +12,15 @@ import (
 
 type AuthHandler struct {
 	authPb.UnimplementedAuthServiceServer
-	AuthMiddleware  *middleware.AuthMiddleware
 	TokenMiddleware *middleware.TokenMiddleware
 	UserService     service.IUserService
 }
 
 func NewAuthHandler(
-	authMiddleware *middleware.AuthMiddleware,
 	tokenMiddleware *middleware.TokenMiddleware,
 	userService service.IUserService,
 ) *AuthHandler {
 	return &AuthHandler{
-		AuthMiddleware:  authMiddleware,
 		TokenMiddleware: tokenMiddleware,
 		UserService:     userService,
 	}

@@ -9,19 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter(h *handler.Handler, m *middleware.Handler) *gin.Engine {
+func NewRouter(h *handler.Handler, m *middleware.Middleware) *gin.Engine {
 	r := gin.New()
 
 	authorize := m.AuthMiddleware.Auth()
 
-	api := r.Group("/api")
+	v1 := r.Group("/v1")
 	{
-		v1 := api.Group("/v1")
+		user := v1.Group("/users").Use(authorize)
 		{
-			post := v1.Group("/example").Use(authorize)
-			{
-				post.GET("/:id", http_server.HandlerFunc(h.V1.Example.Get))
-			}
+			user.GET("", http_server.HandlerFunc(h.V1.User.List))
+			user.GET("/:id", http_server.HandlerFunc(h.V1.User.Get))
 		}
 	}
 

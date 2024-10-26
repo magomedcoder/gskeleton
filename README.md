@@ -1,126 +1,88 @@
-## Golang app skeleton
+## Golang - The Ultimate Folder Structure
 
-## Folder structure
+Organizing your Go (Golang) project's folder structure can help improve code readability, maintainability, and
+scalability.
+While there is no one-size-fits-all structure, here's a common folder structure for a Go project:
 
 ```
 ├─ api
 │   └─ grpc
-│       ├─ auth.proto
-│       └─ user.proto
+│       ├─ pb
+│       └─ proto
+│           ├─ auth.proto
+│           └─ user.proto
 ├─ cmd
-│   ├─ grpc
-│   │   ├─ main.go
-│   │   ├─ wire.go
-│   │   └─ wire_gen.go
-│   │
-│   ├─ http
-│   │   ├─ main.go
-│   │   ├─ wire.go
-│   │   └─ wire_gen.go
-│   │
-│   └── json-rpc
+│   └── gskeleton
 │        ├─ main.go
 │        ├─ wire.go
 │        └─ wire_gen.go
-│
 ├─ configs
-│   └─ main.yaml
-│
+│   └─ gskeleton.yaml
 ├─ internal
 │   ├─ config
 │   │   ├─ app.go
 │   │   ├─ jwt.go
 │   │   ├─ postgres.go
 │   │   └─ server.go
-│   │
 │   ├─ model
 │   │   └─ error.go
-│   │
 │   ├─ provider
 │   │   ├─ app.go
-│   │   ├─ grpc.go
-│   │   ├─ json_rpc.go
 │   │   └─ postgres.go
-│   │
 │   ├─ repository
 │   │   ├─ user
 │   │   │   ├─ entity
 │   │   │   │   └─ user.go
-│   │   │   │
 │   │   │   └─ repo
 │   │   │       ├─ user.go
 │   │   │       ├─ user_create.go
 │   │   │       └─ user_get.go
-│   │   │
 │   │   └─ repository.go
-│   │
 │   ├─ service
 │   │   ├─ user
 │   │   │   └─ user.go
 │   │   └─ postgres.go
-│   │
 │   └─ transport
 │       ├─ grpc
 │       │   ├─ handler
 │       │   │   ├─ auth.go
 │       │   │   └─ user.go
-│       │   │
 │       │   ├─ middleware
-│       │   │   ├─ auth.go
+│       │   │   ├─ authorization.go
 │       │   │   ├─ global.go
+│       │   │   ├─ logging.go
 │       │   │   └─ token.go
-│       │   │
-│       │   └─ router
-│       │       └─ methods.go
-│       ├─ http
-│       │   ├─ handler
-│       │   │   └─ v1
-│       │   │       ├─ example.go
-│       │   │       └─ handler.go
-│       │   │
-│       │   ├─ middleware
-│       │   │   ├─ auth.go
-│       │   │   └─ handler.go
-│       │   │
-│       │   ├─ router
-│       │   │   └─ methods.go
-│       │   │
 │       │   ├─ server.go
 │       │   └─ wire.go
-│       │
-│       └─ json-rpc
+│       └─ http
 │           ├─ handler
-│           │   ├─ example.go
+│           │   └─ v1
+│           │       ├─ example.go
+│           │       └─ handler.go
+│           ├─ middleware
+│           │   ├─ auth.go
 │           │   └─ handler.go
-│           │
-│           └─ router
-│               └─ router.go
-│
+│           ├─ router
+│           │   └─ methods.go
+│           ├─ server.go
+│           └─ wire.go
+├─ migrations
+│   └─ postgres
+│       ├─ 000_migration.down.sql
+│       └─ 000_migration.up.sql
 ├─ pkg
 │   ├─ jencrypt
 │   │   └─ encrypt.go
-│   │
 │   ├─ http-server
 │   │   ├─ context.go
 │   │   ├─ handler.go
 │   │   └─ response.go
-│   │
-│   └─ json-rpc-server
-│   │   ├─ error.go
-│   │   ├─ http.go
-│   │   ├─ options.go
-│   │   ├─ rpc.go
-│   │   ├─ server.go
-│   │   └─ transport.go
-│   │
 │   ├─ jsonutil
 │   │   └─ json.go
-│   │
 │   └─ strutil
 │       └─ str.go
 ├─ test
-│   └─ rpc-call.http
-│
+│   └─ test-http.http
 ├─ .editorconfig
 ├─ .gitignore
 ├─ docker-compose.yaml

@@ -2,11 +2,10 @@ package handler
 
 import (
 	"context"
+	userPb "github.com/magomedcoder/gskeleton/api/grpc/pb/user"
 	"github.com/magomedcoder/gskeleton/internal/repository/user/entity"
 	"github.com/magomedcoder/gskeleton/internal/service"
 	"github.com/magomedcoder/gskeleton/internal/transport/grpc/middleware"
-	"github.com/magomedcoder/gskeleton/pkg/pb_generated/user"
-	userPb "github.com/magomedcoder/gskeleton/pkg/pb_generated/user"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -14,18 +13,18 @@ import (
 )
 
 type UserHandler struct {
-	user.UnimplementedUserServiceServer
-	UserService    service.IUserService
-	AuthMiddleware *middleware.AuthMiddleware
+	userPb.UnimplementedUserServiceServer
+	UserService     service.IUserService
+	TokenMiddleware *middleware.TokenMiddleware
 }
 
 func NewUserHandler(
-	authMiddleware *middleware.AuthMiddleware,
+	tokenMiddleware *middleware.TokenMiddleware,
 	userService service.IUserService,
 ) *UserHandler {
 	return &UserHandler{
-		AuthMiddleware: authMiddleware,
-		UserService:    userService,
+		TokenMiddleware: tokenMiddleware,
+		UserService:     userService,
 	}
 }
 

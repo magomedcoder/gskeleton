@@ -5,7 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	cliv2 "github.com/urfave/cli/v2"
+	"github.com/magomedcoder/gskeleton/internal/config"
+	cliV2 "github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
 	"log"
 	"net/http"
@@ -15,7 +16,12 @@ import (
 	"time"
 )
 
-func Run(ctx *cliv2.Context, app *AppProvider) error {
+type AppProvider struct {
+	Conf   *config.Config
+	Engine *gin.Engine
+}
+
+func Run(ctx *cliV2.Context, app *AppProvider) error {
 	eg, groupCtx := errgroup.WithContext(context.Background())
 
 	gin.SetMode(gin.ReleaseMode)
@@ -25,14 +31,13 @@ func Run(ctx *cliv2.Context, app *AppProvider) error {
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT)
 
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", 8000),
+		Addr:    fmt.Sprintf(":%d", app.Conf.Server.Http.Port),
 		Handler: app.Engine,
 	}
 
 	eg.Go(func() error {
 		log.Printf("Http server running at | PID %d", os.Getpid())
-		err := server.ListenAndServe()
-		if err != nil && err != http.ErrServerClosed {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			return err
 		}
 		return nil

@@ -1,5 +1,5 @@
 package middleware
 
-type Handler struct {
+type Middleware struct {
 	AuthMiddleware *AuthMiddleware
 }

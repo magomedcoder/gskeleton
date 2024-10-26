@@ -5,27 +5,25 @@ install:
 	&& go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest \
 	&& go install github.com/srikrsna/protoc-gen-gotag@latest
 
-.PHONY: run-json-rpc
-run-json-rpc:
-	go run ./cmd/json-rpc ./configs/main.yaml
+.PHONY: run-http
+run-http:
+	go run ./cmd/gskeleton run-http -config ./configs/gskeleton.yaml
 
 .PHONY: run-grpc
 run-grpc:
-	go run ./cmd/grpc
+	go run ./cmd/gskeleton run-grpc -config ./configs/gskeleton.yaml
 
 .PHONY: build
 build:
-	go build -o ./build/app-skeleton-grpc ./cmd/grpc
-	go build -o ./build/app-skeleton-json-rpc ./cmd/json-rpc
+	go build -o ./build/gskeleton ./cmd/gskeleton
 
 .PHONY: proto
 proto:
-	protoc --proto_path api/grpc \
-		   --go_out=pkg/pb_generated \
-		   --go_opt=paths=source_relative \
-		   --go-grpc_opt=paths=source_relative \
-		   --go-grpc_out=pkg/pb_generated \
-		   api/grpc/*.proto
+	protoc --proto_path ./api/grpc/proto \
+		   --go_out=paths=source_relative:./api/grpc/pb \
+		   --go-grpc_out=paths=source_relative:./api/grpc/pb \
+		   ./api/grpc/proto/*.proto
+
 
 .PHONY: install-ubuntu
 install-ubuntu:

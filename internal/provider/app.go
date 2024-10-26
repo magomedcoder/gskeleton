@@ -63,9 +63,9 @@ func (c *App) command(cm Command) *cliv2.Command {
 			cd.Flags = append(cd.Flags, &cliv2.StringFlag{
 				Name:        "config",
 				Aliases:     []string{"c"},
-				Value:       "/etc/gskeleton/main.yaml",
+				Value:       "/etc/gskeleton/gskeleton.yaml",
 				Usage:       "GSkeleton",
-				DefaultText: "/etc/gskeleton/main.yaml",
+				DefaultText: "/etc/gskeleton/gskeleton.yaml",
 			})
 		}
 

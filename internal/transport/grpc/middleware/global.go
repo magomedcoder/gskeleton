@@ -2,12 +2,8 @@ package middleware
 
 import (
 	"context"
-	"github.com/magomedcoder/gskeleton/internal/transport/grpc/router"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/grpclog"
 	"log"
 	"reflect"
-	"time"
 )
 
 type GlobalServiceKey string
@@ -19,8 +15,8 @@ var (
 	GrpcMethodsServiceKey = GlobalServiceKey("grpcMethodsService")
 
 	globalServicesMap = map[reflect.Type]GlobalServiceKey{
-		reflect.TypeOf(&AuthMiddleware{}):           AuthServiceKey,
-		reflect.TypeOf(&router.GrpcMethodService{}): GrpcMethodsServiceKey,
+		reflect.TypeOf(&TokenMiddleware{}):   AuthServiceKey,
+		reflect.TypeOf(&GrpcMethodService{}): GrpcMethodsServiceKey,
 	}
 )
 
@@ -41,28 +37,4 @@ func GetGlobalService(k GlobalServiceKey) interface{} {
 		log.Fatalf("Значение не найдено: %v", k)
 	}
 	return v
-}
-
-func AuthorizationServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	methodService := GetGlobalService(GrpcMethodsServiceKey).(*router.GrpcMethodService)
-	if methodService.IsPublicMethod(info.FullMethod) {
-		return handler(ctx, req)
-	}
-
-	authService := GetGlobalService(AuthServiceKey).(*AuthMiddleware)
-	_, err := authService.ValidateToken(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return handler(ctx, req)
-}
-
-func LoggingServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	start := time.Now()
-	h, err := handler(ctx, req)
-
-	grpclog.Infof("Запрос - Метод: %s \t Длительность:%s \t Ошибка:%v \n", info.FullMethod, time.Since(start), err)
-
-	return h, err
 }
