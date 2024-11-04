@@ -1,94 +1,16 @@
-## Golang - The Ultimate Folder Structure
+# Go Clean Architecture Template
 
-Organizing your Go (Golang) project's folder structure can help improve code readability, maintainability, and
-scalability.
-While there is no one-size-fits-all structure, here's a common folder structure for a Go project:
+## Overview
 
-```
-├─ api
-│   └─ grpc
-│       ├─ pb
-│       └─ proto
-│           ├─ auth.proto
-│           └─ user.proto
-├─ cmd
-│   └── gskeleton
-│        ├─ main.go
-│        ├─ wire.go
-│        └─ wire_gen.go
-├─ configs
-│   └─ gskeleton.yaml
-├─ internal
-│   ├─ config
-│   │   ├─ app.go
-│   │   ├─ jwt.go
-│   │   ├─ postgres.go
-│   │   └─ server.go
-│   ├─ model
-│   │   └─ error.go
-│   ├─ provider
-│   │   ├─ app.go
-│   │   └─ postgres.go
-│   ├─ repository
-│   │   ├─ user
-│   │   │   ├─ entity
-│   │   │   │   └─ user.go
-│   │   │   └─ repo
-│   │   │       ├─ user.go
-│   │   │       ├─ user_create.go
-│   │   │       └─ user_get.go
-│   │   └─ repository.go
-│   ├─ service
-│   │   ├─ user
-│   │   │   └─ user.go
-│   │   └─ postgres.go
-│   └─ transport
-│       ├─ grpc
-│       │   ├─ handler
-│       │   │   ├─ auth.go
-│       │   │   └─ user.go
-│       │   ├─ middleware
-│       │   │   ├─ authorization.go
-│       │   │   ├─ global.go
-│       │   │   ├─ logging.go
-│       │   │   └─ token.go
-│       │   ├─ server.go
-│       │   └─ wire.go
-│       └─ http
-│           ├─ handler
-│           │   └─ v1
-│           │       ├─ example.go
-│           │       └─ handler.go
-│           ├─ middleware
-│           │   ├─ auth.go
-│           │   └─ handler.go
-│           ├─ router
-│           │   └─ methods.go
-│           ├─ server.go
-│           └─ wire.go
-├─ migrations
-│   └─ postgres
-│       ├─ 000_migration.down.sql
-│       └─ 000_migration.up.sql
-├─ pkg
-│   ├─ jencrypt
-│   │   └─ encrypt.go
-│   ├─ http-server
-│   │   ├─ context.go
-│   │   ├─ handler.go
-│   │   └─ response.go
-│   ├─ jsonutil
-│   │   └─ json.go
-│   └─ strutil
-│       └─ str.go
-├─ test
-│   └─ test-http.http
-├─ .editorconfig
-├─ .gitignore
-├─ docker-compose.yaml
-├─ go.mod
-├─ go.sum
-├─ LICENSE
-├─ Makefile
-└─ README.md
-```
+This repository provides a basic folder structure for developing applications in Go using Clean Architecture principles.
+By following this structure, you can focus on building your application without spending time on organizing folders and
+files.
+
+## Why Clean Architecture?
+
+Clean Architecture helps separate concerns within your application, making the codebase more modular, testable, and
+maintainable. The key benefits include:
+
+- **Independence**: Core business logic is separated from external dependencies and frameworks.
+- **Testability**: Each component can be tested independently, making unit and integration testing more straightforward.
+- **Flexibility**: You can easily replace or modify components without affecting the entire application.

@@ -7,20 +7,19 @@
 package main
 
 import (
-	"github.com/magomedcoder/gskeleton/api/grpc/pb/auth"
-	user2 "github.com/magomedcoder/gskeleton/api/grpc/pb/user"
+	"github.com/magomedcoder/gskeleton/api/grpc/pb"
 	"github.com/magomedcoder/gskeleton/internal/config"
+	"github.com/magomedcoder/gskeleton/internal/delivery/grpc"
+	handler2 "github.com/magomedcoder/gskeleton/internal/delivery/grpc/handler"
+	middleware2 "github.com/magomedcoder/gskeleton/internal/delivery/grpc/middleware"
+	"github.com/magomedcoder/gskeleton/internal/delivery/http"
+	"github.com/magomedcoder/gskeleton/internal/delivery/http/handler"
+	"github.com/magomedcoder/gskeleton/internal/delivery/http/handler/v1"
+	"github.com/magomedcoder/gskeleton/internal/delivery/http/middleware"
+	"github.com/magomedcoder/gskeleton/internal/delivery/http/router"
 	"github.com/magomedcoder/gskeleton/internal/provider"
 	"github.com/magomedcoder/gskeleton/internal/repository/user/repo"
-	"github.com/magomedcoder/gskeleton/internal/service/user"
-	"github.com/magomedcoder/gskeleton/internal/transport/grpc"
-	handler2 "github.com/magomedcoder/gskeleton/internal/transport/grpc/handler"
-	middleware2 "github.com/magomedcoder/gskeleton/internal/transport/grpc/middleware"
-	"github.com/magomedcoder/gskeleton/internal/transport/http"
-	"github.com/magomedcoder/gskeleton/internal/transport/http/handler"
-	"github.com/magomedcoder/gskeleton/internal/transport/http/handler/v1"
-	"github.com/magomedcoder/gskeleton/internal/transport/http/middleware"
-	"github.com/magomedcoder/gskeleton/internal/transport/http/router"
+	"github.com/magomedcoder/gskeleton/internal/usecase/user"
 )
 
 // Injectors from wire.go:
@@ -28,8 +27,8 @@ import (
 func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	db := provider.NewPostgresDB(conf)
 	userRepository := repo.NewUserRepository(db)
-	userService := user.NewUserService(userRepository)
-	v1User := v1.NewPostHandler(userService)
+	userUseCase := user.NewUserUseCase(userRepository)
+	v1User := v1.NewPostHandler(userUseCase)
 	v1V1 := &v1.V1{
 		User: v1User,
 	}
@@ -51,19 +50,19 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	tokenMiddleware := middleware2.NewTokenMiddleware(conf)
 	grpcMethodService := middleware2.NewGrpMethodsService()
-	unimplementedAuthServiceServer := auth.UnimplementedAuthServiceServer{}
+	unimplementedAuthServiceServer := pb.UnimplementedAuthServiceServer{}
 	db := provider.NewPostgresDB(conf)
 	userRepository := repo.NewUserRepository(db)
-	userService := user.NewUserService(userRepository)
+	userUseCase := user.NewUserUseCase(userRepository)
 	authHandler := &handler2.AuthHandler{
 		UnimplementedAuthServiceServer: unimplementedAuthServiceServer,
 		TokenMiddleware:                tokenMiddleware,
-		UserService:                    userService,
+		UserUseCase:                    userUseCase,
 	}
-	unimplementedUserServiceServer := user2.UnimplementedUserServiceServer{}
+	unimplementedUserServiceServer := pb.UnimplementedUserServiceServer{}
 	userHandler := &handler2.UserHandler{
 		UnimplementedUserServiceServer: unimplementedUserServiceServer,
-		UserService:                    userService,
+		UserUseCase:                    userUseCase,
 		TokenMiddleware:                tokenMiddleware,
 	}
 	appProvider := &grpc.AppProvider{

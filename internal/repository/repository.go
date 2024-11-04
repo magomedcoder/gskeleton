@@ -1,9 +1,11 @@
 package repository
 
-import "github.com/magomedcoder/gskeleton/internal/repository/user/entity"
+import "github.com/magomedcoder/gskeleton/internal/repository/user/model"
 
 type IUserRepository interface {
-	Create(user entity.User) (*entity.User, error)
-	Get(id int) (*entity.User, error)
-	GetByUsername(username string) (*entity.User, error)
+	Create(user model.User) (*model.User, error)
+
+	Get(id int) (*model.User, error)
+
+	GetByUsername(username string) (*model.User, error)
 }

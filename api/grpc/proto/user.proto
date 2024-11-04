@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package user;
 
-option go_package = "github.com/magomedcoder/gskeleton/api/grpc/pb/user;user_pb";
+option go_package = "github.com/magomedcoder/gskeleton/api/grpc/pb/user;pb";
 
 message Create {
     message Request {

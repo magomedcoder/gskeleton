@@ -2,11 +2,11 @@ package repo
 
 import (
 	"fmt"
-	"github.com/magomedcoder/gskeleton/internal/repository/user/entity"
+	"github.com/magomedcoder/gskeleton/internal/repository/user/model"
 )
 
-func (repo *UserRepository) Get(id int) (*entity.User, error) {
-	user := entity.User{}
+func (repo *UserRepository) Get(id int) (*model.User, error) {
+	user := model.User{}
 	tx := repo.Dao.Find(&user, "id = ?", id)
 	if tx.Error != nil {
 		fmt.Printf("Не удалось получить пользователя: %s", tx.Error)
@@ -16,8 +16,8 @@ func (repo *UserRepository) Get(id int) (*entity.User, error) {
 	return &user, nil
 }
 
-func (repo *UserRepository) GetByUsername(username string) (*entity.User, error) {
-	user := entity.User{}
+func (repo *UserRepository) GetByUsername(username string) (*model.User, error) {
+	user := model.User{}
 	tx := repo.Dao.Find(&user, "username = ?", username)
 	if tx.Error != nil {
 		fmt.Printf("Не удалось получить пользователя: %s", tx.Error)

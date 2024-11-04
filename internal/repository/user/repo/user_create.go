@@ -2,10 +2,10 @@ package repo
 
 import (
 	"fmt"
-	"github.com/magomedcoder/gskeleton/internal/repository/user/entity"
+	"github.com/magomedcoder/gskeleton/internal/repository/user/model"
 )
 
-func (repo *UserRepository) Create(user entity.User) (*entity.User, error) {
+func (repo *UserRepository) Create(user model.User) (*model.User, error) {
 	tx := repo.Dao.Create(&user)
 	if tx.Error != nil {
 		fmt.Printf("Не удалось создать пользователя: %s", tx.Error)

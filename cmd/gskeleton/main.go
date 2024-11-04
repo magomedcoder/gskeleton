@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/magomedcoder/gskeleton/internal/config"
+	"github.com/magomedcoder/gskeleton/internal/delivery/grpc"
+	"github.com/magomedcoder/gskeleton/internal/delivery/http"
 	"github.com/magomedcoder/gskeleton/internal/provider"
-	"github.com/magomedcoder/gskeleton/internal/transport/grpc"
-	"github.com/magomedcoder/gskeleton/internal/transport/http"
 	cliV2 "github.com/urfave/cli/v2"
 )
 
