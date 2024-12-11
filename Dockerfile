@@ -1,6 +1,6 @@
-FROM alpine:3.19 AS builder
+FROM alpine:3.20 AS builder
 
-ARG GOLANG_VERSION=1.22.6
+ARG GOLANG_VERSION=1.23.4
 
 RUN apk update && \
     apk add --no-cache make gcc openssh bash musl-dev openssl-dev ca-certificates && \
@@ -27,7 +27,7 @@ RUN go mod tidy
 
 RUN make build
 
-FROM alpine:3.19
+FROM alpine:3.20
 
 COPY --from=builder /usr/src/gskeleton/build /usr/bin
 
