@@ -1,4 +1,4 @@
-package gormrepo
+package gormutil
 
 import (
 	"fmt"

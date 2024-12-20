@@ -3,10 +3,10 @@ package model
 import "time"
 
 type User struct {
-	Id        int64     `gorm:"primaryKey"`
-	Username  string    `gorm:"username"`
-	Password  string    `gorm:"password"`
-	CreatedAt time.Time `gorm:"created_at"`
+	Id        int64     `gorm:"column:id;primaryKey"`
+	Username  string    `gorm:"column:username"`
+	Password  string    `gorm:"column:password"`
+	CreatedAt time.Time `gorm:"column:created_at"`
 }
 
 func (User) TableName() string {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/magomedcoder/gskeleton/internal/domain/entity"
 	"github.com/magomedcoder/gskeleton/internal/usecase"
-	"github.com/magomedcoder/gskeleton/pkg/core"
-	"github.com/magomedcoder/gskeleton/pkg/db/gormrepo"
+	"github.com/magomedcoder/gskeleton/pkg/ginutil"
+	"github.com/magomedcoder/gskeleton/pkg/gormutil"
 	"gorm.io/gorm"
 	"strconv"
 )
@@ -22,8 +22,7 @@ func NewUserHandler(
 	}
 }
 
-func (u *User) Create(ctx *core.GinContext) error {
-
+func (u *User) Create(ctx *ginutil.Context) error {
 	return ctx.Success(Get{})
 }
 
@@ -32,7 +31,7 @@ type ListResponse struct {
 	Items []*entity.User `json:"items"`
 }
 
-func (u *User) List(ctx *core.GinContext) error {
+func (u *User) List(ctx *ginutil.Context) error {
 	var params entity.Pagination
 	if err := ctx.Context.ShouldBindQuery(&params); err != nil {
 		fmt.Println(err)
@@ -40,13 +39,13 @@ func (u *User) List(ctx *core.GinContext) error {
 
 	var count int64
 	users, err := u.UserUseCase.GetUsers(ctx.Ctx(), func(db *gorm.DB) {
-		db.Scopes(gormrepo.Paginate(&gormrepo.Pagination{
+		db.Scopes(gormutil.Paginate(&gormutil.Pagination{
 			Page:     params.Page,
 			PageSize: params.Limit,
 		})).Count(&count)
 	})
 	if err != nil {
-		return ctx.ErrorBusiness("Пользователи не найдены")
+		return ctx.Error("Пользователи не найдены")
 	}
 
 	items := make([]*entity.User, 0)
@@ -67,15 +66,15 @@ type Get struct {
 	Id int64 `json:"id"`
 }
 
-func (u *User) Get(ctx *core.GinContext) error {
+func (u *User) Get(ctx *ginutil.Context) error {
 	id, err := strconv.ParseInt(ctx.Context.Param("id"), 10, 64)
 	if err != nil {
-		return ctx.ErrorBusiness("Неверный id")
+		return ctx.Error("Неверный id")
 	}
 
 	user, _ := u.UserUseCase.GetUserById(ctx.Ctx(), id)
 	if user.Id == 0 {
-		return ctx.ErrorBusiness("Пользователь не найден")
+		return ctx.Error("Пользователь не найден")
 	}
 
 	return ctx.Success(Get{

@@ -1,5 +1,3 @@
-create database gskeleton;
-
 create table users
 (
     id         serial primary key,

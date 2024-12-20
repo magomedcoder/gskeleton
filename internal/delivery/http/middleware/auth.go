@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/magomedcoder/gskeleton/pkg/core"
+	"github.com/magomedcoder/gskeleton/pkg/ginutil"
 	"net/http"
 	"strings"
 
@@ -19,7 +19,7 @@ func (a *AuthMiddleware) Auth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := AuthHeaderToken(ctx)
 		if token == "" {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, &core.Response{
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, &ginutil.Response{
 				Message: "Невалидный токен",
 			})
 			return

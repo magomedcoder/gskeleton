@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/magomedcoder/gskeleton/internal/cli/commands"
+	"github.com/magomedcoder/gskeleton/internal/cli"
 	"github.com/magomedcoder/gskeleton/internal/config"
 	"github.com/magomedcoder/gskeleton/internal/delivery/grpc"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http"
@@ -60,7 +60,7 @@ func NewCliCommand() provider.Command {
 			},
 		},
 		Action: func(ctx *cliV2.Context, conf *config.Config) error {
-			return commands.Migrate(ctx, NewCliInjector(conf))
+			return cli.Run(ctx, NewCliInjector(conf))
 		},
 	}
 }

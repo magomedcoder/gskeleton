@@ -1,27 +1,27 @@
-package commands
+package handler
 
 import (
+	"context"
 	"github.com/magomedcoder/gskeleton"
 	"github.com/magomedcoder/gskeleton/internal/config"
-	"github.com/magomedcoder/gskeleton/pkg/db/migrate"
-	"github.com/urfave/cli/v2"
+	"github.com/magomedcoder/gskeleton/pkg/migrateutil"
 	"gorm.io/gorm"
 	"log"
 )
 
-type AppProvider struct {
+type Migrate struct {
 	Conf *config.Config
 	Db   *gorm.DB
 }
 
-func Migrate(ctx *cli.Context, app *AppProvider) error {
-	conn, err := app.Db.DB()
+func (m *Migrate) Migrate(ctx context.Context) error {
+	conn, err := m.Db.DB()
 	if err != nil {
 		log.Fatalf("Не удалось подключиться к базе данных: %v", err)
 	}
 	defer conn.Close()
 
-	migrator := migrate.MustGetNewMigrator(gskeleton.Migration(), "migrations/postgres")
+	migrator := migrateutil.MustGetNewMigrator(gskeleton.Migration(), "migrations/postgres")
 	if err = migrator.ApplyMigrations(conn); err != nil {
 		log.Fatalf("Ошибка при применении миграций: %v", err)
 	}

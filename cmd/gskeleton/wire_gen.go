@@ -8,7 +8,8 @@ package main
 
 import (
 	"github.com/magomedcoder/gskeleton/api/grpc/pb"
-	"github.com/magomedcoder/gskeleton/internal/cli/commands"
+	"github.com/magomedcoder/gskeleton/internal/cli"
+	handler3 "github.com/magomedcoder/gskeleton/internal/cli/handler"
 	"github.com/magomedcoder/gskeleton/internal/config"
 	"github.com/magomedcoder/gskeleton/internal/delivery/grpc"
 	handler2 "github.com/magomedcoder/gskeleton/internal/delivery/grpc/handler"
@@ -93,11 +94,15 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	return appProvider
 }
 
-func NewCliInjector(conf *config.Config) *commands.AppProvider {
+func NewCliInjector(conf *config.Config) *cli.AppProvider {
 	db := provider.NewPostgresDB(conf)
-	appProvider := &commands.AppProvider{
+	migrate := &handler3.Migrate{
 		Conf: conf,
 		Db:   db,
+	}
+	appProvider := &cli.AppProvider{
+		Conf:    conf,
+		Migrate: migrate,
 	}
 	return appProvider
 }
