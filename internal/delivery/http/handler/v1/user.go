@@ -1,13 +1,14 @@
 package v1
 
 import (
-	"fmt"
-	"github.com/magomedcoder/gskeleton/internal/domain/entity"
+	v1Pb "github.com/magomedcoder/gskeleton/api/http/pb/v1"
+	postgresModel "github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/model"
 	"github.com/magomedcoder/gskeleton/internal/usecase"
 	"github.com/magomedcoder/gskeleton/pkg/ginutil"
 	"github.com/magomedcoder/gskeleton/pkg/gormutil"
 	"gorm.io/gorm"
 	"strconv"
+	"time"
 )
 
 type User struct {
@@ -23,24 +24,47 @@ func NewUserHandler(
 }
 
 func (u *User) Create(ctx *ginutil.Context) error {
+	params := &v1Pb.CreateUserRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
 
-	return ctx.Success(Get{})
-}
+	passwordHash, err := u.UserUseCase.HashPassword(params.Password)
+	if err != nil {
+		return ctx.Error("Не удалось хешировать пароль")
+	}
 
-type ListResponse struct {
-	Total int64          `json:"total"`
-	Items []*entity.User `json:"items"`
+	user := postgresModel.User{
+		Username:  params.Username,
+		Password:  passwordHash,
+		CreatedAt: time.Now(),
+	}
+
+	if _, err = u.UserUseCase.Create(ctx.Ctx(), &user); err != nil {
+		return ctx.Error(err.Error())
+	}
+
+	return ctx.Success(&v1Pb.GetUserResponse{
+		Id:       user.Id,
+		Username: user.Username,
+		Name:     user.Name,
+	})
 }
 
 func (u *User) List(ctx *ginutil.Context) error {
-	var params entity.Pagination
-	if err := ctx.Context.ShouldBindQuery(&params); err != nil {
-		fmt.Println(err)
+	page, err := strconv.Atoi(ctx.Context.DefaultQuery("page", "1"))
+	if err != nil {
+		return ctx.Error("Неверный номер страницы")
+	}
+
+	pageSize, err := strconv.Atoi(ctx.Context.DefaultQuery("pageSize", "15"))
+	if err != nil {
+		return ctx.Error("Неверный размер страницы")
 	}
 
 	pagination := &gormutil.Pagination{}
-	pagination.SetPage(params.Page)
-	pagination.SetPageSize(params.Limit)
+	pagination.SetPage(page)
+	pagination.SetPageSize(pageSize)
 
 	var count int64
 	users, err := u.UserUseCase.GetUsers(ctx.Ctx(), func(db *gorm.DB) {
@@ -50,23 +74,19 @@ func (u *User) List(ctx *ginutil.Context) error {
 		return ctx.Error("Пользователи не найдены")
 	}
 
-	items := make([]*entity.User, 0)
+	items := make([]*v1Pb.UserItem, 0)
 	for _, item := range users {
-		items = append(items, &entity.User{
-			Id:   item.Id,
-			Name: item.Name,
+		items = append(items, &v1Pb.UserItem{
+			Id:       item.Id,
+			Username: item.Username,
+			Name:     item.Name,
 		})
 	}
 
-	return ctx.Success(ListResponse{
+	return ctx.Success(&v1Pb.GetUsersResponse{
 		Total: count,
 		Items: items,
 	})
-}
-
-type Get struct {
-	Id       int64  `json:"id"`
-	Username string `json:"username"`
 }
 
 func (u *User) Get(ctx *ginutil.Context) error {
@@ -80,8 +100,9 @@ func (u *User) Get(ctx *ginutil.Context) error {
 		return ctx.Error("Пользователь не найден")
 	}
 
-	return ctx.Success(Get{
+	return ctx.Success(&v1Pb.GetUserResponse{
 		Id:       user.Id,
 		Username: user.Username,
+		Name:     user.Name,
 	})
 }

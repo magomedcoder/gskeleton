@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package auth;
+package gskeleton.grpc.user;
 
-option go_package = "github.com/magomedcoder/gskeleton/api/grpc/pb/auth;pb";
+option go_package = "github.com/magomedcoder/gskeleton/api/grpc/pb";
 
 service AuthService {
     rpc Login(Login.Request) returns (Login.Response) {}

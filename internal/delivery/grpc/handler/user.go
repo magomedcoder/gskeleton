@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/magomedcoder/gskeleton/api/grpc/pb"
 	"github.com/magomedcoder/gskeleton/internal/delivery/grpc/middleware"
-	"github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/model"
+	postgresModel "github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/model"
 	"github.com/magomedcoder/gskeleton/internal/usecase"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
@@ -42,7 +42,7 @@ func (u *UserHandler) Create(ctx context.Context, in *pb.Create_Request) (*pb.Cr
 		return nil, status.Error(codes.Internal, "Не удалось хешировать пароль")
 	}
 
-	user := model.User{
+	user := postgresModel.User{
 		Username:  in.Username,
 		Password:  passwordHash,
 		CreatedAt: time.Now(),

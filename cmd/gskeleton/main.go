@@ -49,7 +49,8 @@ func NewGrpcCommand() provider.Command {
 
 func NewCliCommand() provider.Command {
 	return provider.Command{
-		Name: "cli-migrate",
+		Name:  "cli-migrate",
+		Usage: "Cli migrate",
 		Flags: []cliV2.Flag{
 			&cliV2.StringFlag{
 				Name:        "config",

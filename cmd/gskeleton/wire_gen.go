@@ -96,9 +96,17 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 
 func NewCliInjector(conf *config.Config) *cli.AppProvider {
 	db := provider.NewPostgresDB(conf)
+	userRepository := repository.NewUserRepository(db)
+	client := provider.NewRedisClient(conf)
+	userCacheRepository := repository2.NewUserCacheRepository(client)
+	userUseCase := &usecase.UserUseCase{
+		PostgresUserRepo:         userRepository,
+		RedisUserCacheRepository: userCacheRepository,
+	}
 	migrate := &handler3.Migrate{
-		Conf: conf,
-		Db:   db,
+		Conf:        conf,
+		Db:          db,
+		UserUseCase: userUseCase,
 	}
 	appProvider := &cli.AppProvider{
 		Conf:    conf,

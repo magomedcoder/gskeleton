@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/model"
 	"github.com/magomedcoder/gskeleton/pkg/gormutil"
 	"gorm.io/gorm"
@@ -59,7 +60,9 @@ func (u *UserRepository) Get(ctx context.Context, id int64) (*model.User, error)
 func (u *UserRepository) GetByUsername(ctx context.Context, username string) (*model.User, error) {
 	user, err := u.Repo.FindByWhere(context.TODO(), "username = ?", username)
 	if err != nil {
-		log.Printf("Не удалось получить пользователя: %s", err)
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Printf("Не удалось получить пользователя: %s", err)
+		}
 		return nil, err
 	}
 

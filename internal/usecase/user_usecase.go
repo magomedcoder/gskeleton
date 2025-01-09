@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/magomedcoder/gskeleton/internal/domain/entity"
 	postgresModel "github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/model"
@@ -12,6 +13,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
+	"log"
 	"time"
 )
 
@@ -55,8 +57,9 @@ func (u *UserUseCase) GetUsers(ctx context.Context, arg ...func(*gorm.DB)) ([]*e
 	items := make([]*entity.User, 0)
 	for _, item := range users {
 		items = append(items, &entity.User{
-			Id:   item.Id,
-			Name: item.Username,
+			Id:       item.Id,
+			Username: item.Username,
+			Name:     item.Name,
 		})
 	}
 
@@ -66,10 +69,12 @@ func (u *UserUseCase) GetUsers(ctx context.Context, arg ...func(*gorm.DB)) ([]*e
 func (u *UserUseCase) Create(ctx context.Context, userModel *postgresModel.User) (*postgresModel.User, error) {
 	user, err := u.PostgresUserRepo.GetByUsername(ctx, userModel.Username)
 	if err != nil {
-		return nil, status.Error(codes.Internal, fmt.Sprintf("Не удалось создать пользователя: %s", user.Username))
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Println(err)
+		}
 	}
 
-	if user.Id != 0 {
+	if user != nil && user.Id != 0 {
 		return nil, status.Error(codes.AlreadyExists, fmt.Sprintf("Пользователь %s уже существует", user.Username))
 	}
 

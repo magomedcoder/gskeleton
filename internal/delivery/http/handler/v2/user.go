@@ -1,13 +1,14 @@
 package v2
 
 import (
-	"fmt"
-	"github.com/magomedcoder/gskeleton/internal/domain/entity"
+	v2Pb "github.com/magomedcoder/gskeleton/api/http/pb/v2"
+	postgresModel "github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/model"
 	"github.com/magomedcoder/gskeleton/internal/usecase"
 	"github.com/magomedcoder/gskeleton/pkg/ginutil"
 	"github.com/magomedcoder/gskeleton/pkg/gormutil"
 	"gorm.io/gorm"
 	"strconv"
+	"time"
 )
 
 type User struct {
@@ -23,47 +24,68 @@ func NewUserHandler(
 }
 
 func (u *User) Create(ctx *ginutil.Context) error {
-	return ctx.Success(Get{})
-}
+	params := &v2Pb.CreateUserRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
 
-type ListResponse struct {
-	Total int64          `json:"total"`
-	Items []*entity.User `json:"items"`
+	passwordHash, err := u.UserUseCase.HashPassword(params.Password)
+	if err != nil {
+		return ctx.Error("Не удалось хешировать пароль")
+	}
+
+	user := postgresModel.User{
+		Username:  params.Username,
+		Password:  passwordHash,
+		CreatedAt: time.Now(),
+	}
+
+	if _, err = u.UserUseCase.Create(ctx.Ctx(), &user); err != nil {
+		return ctx.Error(err.Error())
+	}
+
+	return ctx.Success(&v2Pb.GetUserResponse{
+		Id:       user.Id,
+		Username: user.Username,
+		Name:     user.Name,
+	})
 }
 
 func (u *User) List(ctx *ginutil.Context) error {
-	var params entity.Pagination
-	if err := ctx.Context.ShouldBindQuery(&params); err != nil {
-		fmt.Println(err)
+	page, err := strconv.Atoi(ctx.Context.DefaultQuery("page", "1"))
+	if err != nil {
+		return ctx.Error("Неверный номер страницы")
+	}
+
+	pageSize, err := strconv.Atoi(ctx.Context.DefaultQuery("pageSize", "15"))
+	if err != nil {
+		return ctx.Error("Неверный размер страницы")
 	}
 
 	var count int64
 	users, err := u.UserUseCase.GetUsers(ctx.Ctx(), func(db *gorm.DB) {
 		db.Scopes(gormutil.Paginate(&gormutil.Pagination{
-			Page:     params.Page,
-			PageSize: params.Limit,
+			Page:     page,
+			PageSize: pageSize,
 		})).Count(&count)
 	})
 	if err != nil {
 		return ctx.Error("Пользователи не найдены")
 	}
 
-	items := make([]*entity.User, 0)
+	items := make([]*v2Pb.UserItem, 0)
 	for _, item := range users {
-		items = append(items, &entity.User{
-			Id:   item.Id,
-			Name: item.Name,
+		items = append(items, &v2Pb.UserItem{
+			Id:       item.Id,
+			Username: item.Username,
+			Name:     item.Name,
 		})
 	}
 
-	return ctx.Success(ListResponse{
+	return ctx.Success(&v2Pb.GetUsersResponse{
 		Total: count,
 		Items: items,
 	})
-}
-
-type Get struct {
-	Id int64 `json:"id"`
 }
 
 func (u *User) Get(ctx *ginutil.Context) error {
@@ -77,7 +99,9 @@ func (u *User) Get(ctx *ginutil.Context) error {
 		return ctx.Error("Пользователь не найден")
 	}
 
-	return ctx.Success(Get{
-		Id: user.Id,
+	return ctx.Success(&v2Pb.GetUserResponse{
+		Id:       user.Id,
+		Username: user.Username,
+		Name:     user.Name,
 	})
 }
