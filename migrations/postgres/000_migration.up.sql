@@ -1,8 +1,8 @@
-create table users
+CREATE TABLE users
 (
-    id         serial primary key,
-    username   varchar(255) not null,
-    password   varchar      not null,
-    name       varchar,
-    created_at timestamp    not null
+    id         SERIAL PRIMARY KEY,
+    username   VARCHAR(255) NOT NULL,
+    password   VARCHAR      NOT NULL,
+    name       VARCHAR,
+    created_at TIMESTAMP DEFAULT now()
 );

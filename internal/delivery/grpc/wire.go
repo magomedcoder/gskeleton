@@ -5,14 +5,11 @@ import (
 	"github.com/magomedcoder/gskeleton/internal/delivery/grpc/handler"
 	"github.com/magomedcoder/gskeleton/internal/delivery/grpc/middleware"
 	"github.com/magomedcoder/gskeleton/internal/infrastructure"
-	"github.com/magomedcoder/gskeleton/internal/provider"
 	"github.com/magomedcoder/gskeleton/internal/usecase"
 )
 
 var ProviderSet = wire.NewSet(
 	wire.Struct(new(AppProvider), "*"),
-	provider.NewPostgresDB,
-	provider.NewRedisClient,
 	handler.ProviderSet,
 	middleware.ProviderSet,
 	usecase.ProviderSet,

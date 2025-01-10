@@ -6,7 +6,6 @@ import (
 )
 
 var ProviderSet = wire.NewSet(
-	//wire.Struct(new(repository.UserRepository), "*"),
 	wire.Bind(new(repository.IUserRepository), new(*repository.UserRepository)),
 	repository.NewUserRepository,
 )

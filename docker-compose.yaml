@@ -54,6 +54,19 @@ services:
     networks:
       - network-gskeleton
 
+  clickhouse:
+    container_name: clickhouse
+    image: clickhouse/clickhouse-server:24.8
+    environment:
+      - CLICKHOUSE_USER=clickhouse
+      - CLICKHOUSE_PASSWORD=clickhouse
+      - CLICKHOUSE_DB=gskeleton
+    ports:
+      - "9000:9000"
+      - "8123:8123"
+    networks:
+      - network-gskeleton
+
 volumes:
   postgres:
 

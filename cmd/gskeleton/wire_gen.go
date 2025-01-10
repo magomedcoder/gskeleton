@@ -7,6 +7,7 @@
 package main
 
 import (
+	"github.com/google/wire"
 	"github.com/magomedcoder/gskeleton/api/grpc/pb"
 	"github.com/magomedcoder/gskeleton/internal/cli"
 	handler3 "github.com/magomedcoder/gskeleton/internal/cli/handler"
@@ -20,6 +21,7 @@ import (
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/handler/v2"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/middleware"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/router"
+	repository3 "github.com/magomedcoder/gskeleton/internal/infrastructure/clickhouse/repository"
 	"github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/repository"
 	repository2 "github.com/magomedcoder/gskeleton/internal/infrastructure/redis/repository"
 	"github.com/magomedcoder/gskeleton/internal/provider"
@@ -29,13 +31,16 @@ import (
 // Injectors from wire.go:
 
 func NewHttpInjector(conf *config.Config) *http.AppProvider {
-	db := provider.NewPostgresDB(conf)
+	db := provider.NewPostgresClient(conf)
 	userRepository := repository.NewUserRepository(db)
 	client := provider.NewRedisClient(conf)
 	userCacheRepository := repository2.NewUserCacheRepository(client)
+	conn := provider.NewClickHouseClient(conf)
+	userLogRepository := repository3.NewUserLogRepository(conn)
 	userUseCase := &usecase.UserUseCase{
-		PostgresUserRepo:         userRepository,
-		RedisUserCacheRepository: userCacheRepository,
+		UserRepo:            userRepository,
+		UserCacheRepository: userCacheRepository,
+		UserLogRepository:   userLogRepository,
 	}
 	user := v1.NewUserHandler(userUseCase)
 	v1V1 := &v1.V1{
@@ -65,13 +70,16 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	tokenMiddleware := middleware2.NewTokenMiddleware(conf)
 	grpcMethodService := middleware2.NewGrpMethodsService()
 	unimplementedAuthServiceServer := pb.UnimplementedAuthServiceServer{}
-	db := provider.NewPostgresDB(conf)
+	db := provider.NewPostgresClient(conf)
 	userRepository := repository.NewUserRepository(db)
 	client := provider.NewRedisClient(conf)
 	userCacheRepository := repository2.NewUserCacheRepository(client)
+	conn := provider.NewClickHouseClient(conf)
+	userLogRepository := repository3.NewUserLogRepository(conn)
 	userUseCase := &usecase.UserUseCase{
-		PostgresUserRepo:         userRepository,
-		RedisUserCacheRepository: userCacheRepository,
+		UserRepo:            userRepository,
+		UserCacheRepository: userCacheRepository,
+		UserLogRepository:   userLogRepository,
 	}
 	authHandler := &handler2.AuthHandler{
 		UnimplementedAuthServiceServer: unimplementedAuthServiceServer,
@@ -95,13 +103,16 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 }
 
 func NewCliInjector(conf *config.Config) *cli.AppProvider {
-	db := provider.NewPostgresDB(conf)
+	db := provider.NewPostgresClient(conf)
 	userRepository := repository.NewUserRepository(db)
 	client := provider.NewRedisClient(conf)
 	userCacheRepository := repository2.NewUserCacheRepository(client)
+	conn := provider.NewClickHouseClient(conf)
+	userLogRepository := repository3.NewUserLogRepository(conn)
 	userUseCase := &usecase.UserUseCase{
-		PostgresUserRepo:         userRepository,
-		RedisUserCacheRepository: userCacheRepository,
+		UserRepo:            userRepository,
+		UserCacheRepository: userCacheRepository,
+		UserLogRepository:   userLogRepository,
 	}
 	migrate := &handler3.Migrate{
 		Conf:        conf,
@@ -114,3 +125,7 @@ func NewCliInjector(conf *config.Config) *cli.AppProvider {
 	}
 	return appProvider
 }
+
+// wire.go:
+
+var ProviderSet = wire.NewSet(provider.NewPostgresClient, provider.NewClickHouseClient, provider.NewRedisClient)

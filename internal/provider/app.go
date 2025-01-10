@@ -40,6 +40,12 @@ func (a *App) createCommand(cm Command) *cliV2.Command {
 		Subcommands: a.createSubcommands(cm.Subcommands),
 	}
 
+	if len(cm.Flags) == 0 {
+		cd.Flags = a.app.Flags
+	} else {
+		cd.Flags = cm.Flags
+	}
+
 	if cm.Action != nil {
 		cd.Action = func(ctx *cliV2.Context) error {
 			return cm.Action(ctx, config.New(ctx.String("config")))

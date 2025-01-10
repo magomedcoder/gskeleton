@@ -2,6 +2,7 @@ package infrastructure
 
 import (
 	"github.com/google/wire"
+	"github.com/magomedcoder/gskeleton/internal/infrastructure/clickhouse"
 	"github.com/magomedcoder/gskeleton/internal/infrastructure/postgres"
 	"github.com/magomedcoder/gskeleton/internal/infrastructure/redis"
 )
@@ -9,4 +10,5 @@ import (
 var ProviderSet = wire.NewSet(
 	postgres.ProviderSet,
 	redis.ProviderSet,
+	clickhouse.ProviderSet,
 )

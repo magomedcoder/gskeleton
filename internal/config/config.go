@@ -10,11 +10,12 @@ import (
 )
 
 type Config struct {
-	Server   *Server   `yaml:"server"`
-	Postgres *Postgres `yaml:"postgres"`
-	Redis    *Redis    `yaml:"redis"`
-	Jwt      *Jwt      `yaml:"jwt"`
-	sid      string
+	Server     *Server     `yaml:"server"`
+	Postgres   *Postgres   `yaml:"postgres"`
+	Redis      *Redis      `yaml:"redis"`
+	ClickHouse *ClickHouse `yaml:"clickhouse"`
+	Jwt        *Jwt        `yaml:"jwt"`
+	sid        string
 }
 
 func New(filename string) *Config {

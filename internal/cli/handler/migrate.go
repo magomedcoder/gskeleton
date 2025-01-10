@@ -33,6 +33,10 @@ func (m *Migrate) Migrate(ctx context.Context) error {
 		return errors.New(fmt.Sprintf("Ошибка при применении миграций: %v", err))
 	}
 
+	return nil
+}
+
+func (m *Migrate) CreateUser(ctx context.Context) error {
 	if _, err := m.UserUseCase.Create(ctx, &postgresModel.User{
 		Username:  "admin",
 		Password:  "admin123",
@@ -40,5 +44,6 @@ func (m *Migrate) Migrate(ctx context.Context) error {
 	}); err != nil {
 		return err
 	}
+
 	return nil
 }

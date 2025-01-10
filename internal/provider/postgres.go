@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func NewPostgresDB(conf *config.Config) *gorm.DB {
+func NewPostgresClient(conf *config.Config) *gorm.DB {
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN: conf.Postgres.GetDsn(),
 	}), &gorm.Config{})

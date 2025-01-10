@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/magomedcoder/gskeleton/internal/domain/entity"
+	clickhouseModel "github.com/magomedcoder/gskeleton/internal/infrastructure/clickhouse/model"
+	clickhouseRepo "github.com/magomedcoder/gskeleton/internal/infrastructure/clickhouse/repository"
 	postgresModel "github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/model"
 	postgresRepo "github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/repository"
 	redisModel "github.com/magomedcoder/gskeleton/internal/infrastructure/redis/model"
@@ -34,8 +36,9 @@ type IUserUseCase interface {
 var _ IUserUseCase = (*UserUseCase)(nil)
 
 type UserUseCase struct {
-	PostgresUserRepo         postgresRepo.IUserRepository
-	RedisUserCacheRepository redisRepo.IUserCacheRepository
+	UserRepo            postgresRepo.IUserRepository
+	UserCacheRepository redisRepo.IUserCacheRepository
+	UserLogRepository   clickhouseRepo.IUserLogRepository
 }
 
 func (u *UserUseCase) HashPassword(password string) (string, error) {
@@ -49,7 +52,7 @@ func (u *UserUseCase) CheckPasswordHash(password, hash string) (bool, error) {
 }
 
 func (u *UserUseCase) GetUsers(ctx context.Context, arg ...func(*gorm.DB)) ([]*entity.User, error) {
-	users, err := u.PostgresUserRepo.GetUsers(ctx, arg...)
+	users, err := u.UserRepo.GetUsers(ctx, arg...)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +70,7 @@ func (u *UserUseCase) GetUsers(ctx context.Context, arg ...func(*gorm.DB)) ([]*e
 }
 
 func (u *UserUseCase) Create(ctx context.Context, userModel *postgresModel.User) (*postgresModel.User, error) {
-	user, err := u.PostgresUserRepo.GetByUsername(ctx, userModel.Username)
+	user, err := u.UserRepo.GetByUsername(ctx, userModel.Username)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			log.Println(err)
@@ -78,32 +81,48 @@ func (u *UserUseCase) Create(ctx context.Context, userModel *postgresModel.User)
 		return nil, status.Error(codes.AlreadyExists, fmt.Sprintf("Пользователь %s уже существует", user.Username))
 	}
 
-	createdUser, err := u.PostgresUserRepo.Create(ctx, userModel)
+	createdUser, err := u.UserRepo.Create(ctx, userModel)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Не удалось создать пользователя")
 	}
 
-	if err := u.RedisUserCacheRepository.Set(ctx, "user_cache", redisModel.UserCache{
+	if err := u.UserCacheRepository.Set(ctx, "user_cache", redisModel.UserCache{
 		Id:       createdUser.Id,
 		Username: createdUser.Username,
 	}, int64(time.Hour.Seconds())); err != nil {
 		fmt.Printf("не удалось кэшировать пользователя: %v\n", err)
 	}
 
+	if err := u.UserLogRepository.Create(ctx, &clickhouseModel.UserLog{
+		UserId:    createdUser.Id,
+		Log:       "user create",
+		CreatedAt: time.Now(),
+	}); err != nil {
+		return nil, status.Error(codes.Internal, "Не удалось создать пользователя")
+	}
+
 	return createdUser, nil
 }
 
 func (u *UserUseCase) GetUserById(ctx context.Context, id int64) (*postgresModel.User, error) {
-	user, err := u.PostgresUserRepo.Get(ctx, id)
+	user, err := u.UserRepo.Get(ctx, id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("Не удалось получить пользователя: %v", id))
+	}
+
+	if err := u.UserLogRepository.Create(ctx, &clickhouseModel.UserLog{
+		UserId:    user.Id,
+		Log:       "Get user by id",
+		CreatedAt: time.Now(),
+	}); err != nil {
+		return nil, status.Error(codes.Internal, "Не удалось создать пользователя")
 	}
 
 	return user, nil
 }
 
 func (u *UserUseCase) GetUserByUsername(ctx context.Context, username string) (*postgresModel.User, error) {
-	user, err := u.PostgresUserRepo.GetByUsername(ctx, username)
+	user, err := u.UserRepo.GetByUsername(ctx, username)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("Не удалось получить пользователя: %s", username))
 	}

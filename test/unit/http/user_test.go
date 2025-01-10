@@ -7,7 +7,9 @@ import (
 	v2 "github.com/magomedcoder/gskeleton/internal/delivery/http/handler/v2"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/middleware"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/router"
-	"github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/repository"
+	clickhouseRepo "github.com/magomedcoder/gskeleton/internal/infrastructure/clickhouse/repository"
+	postgresRepo "github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/repository"
+	redisRepo "github.com/magomedcoder/gskeleton/internal/infrastructure/redis/repository"
 	"github.com/magomedcoder/gskeleton/internal/provider"
 	"github.com/magomedcoder/gskeleton/internal/usecase"
 	"github.com/magomedcoder/gskeleton/test"
@@ -18,10 +20,16 @@ import (
 )
 
 func SetupRouter() *gin.Engine {
-	db := provider.NewPostgresDB(test.GetConfig())
-	userRepository := repository.NewUserRepository(db)
+	postgres := provider.NewPostgresClient(test.GetConfig())
+	redis := provider.NewRedisClient(test.GetConfig())
+	clickHouse := provider.NewClickHouseClient(test.GetConfig())
+	userRepository := postgresRepo.NewUserRepository(postgres)
+	userCacheRepository := redisRepo.NewUserCacheRepository(redis)
+	userLogRepository := clickhouseRepo.NewUserLogRepository(clickHouse)
 	userUseCase := &usecase.UserUseCase{
-		PostgresUserRepo: userRepository,
+		UserRepo:            userRepository,
+		UserCacheRepository: userCacheRepository,
+		UserLogRepository:   userLogRepository,
 	}
 	user := v1.NewUserHandler(userUseCase)
 	v1V1 := &v1.V1{

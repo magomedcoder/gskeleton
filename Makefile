@@ -12,15 +12,19 @@ install:
 
 .PHONY: run-http
 run-http:
-	go run ./cmd/gskeleton run-http -config ./configs/gskeleton.yaml
+	go run ./cmd/gskeleton run http -config ./configs/gskeleton.yaml
 
 .PHONY: run-grpc
 run-grpc:
-	go run ./cmd/gskeleton run-grpc -config ./configs/gskeleton.yaml
+	go run ./cmd/gskeleton run grpc -config ./configs/gskeleton.yaml
 
 .PHONY: cli-migrate
 cli-migrate:
-	go run ./cmd/gskeleton cli-migrate -config ./configs/gskeleton.yaml
+	go run ./cmd/gskeleton cli migrate -config ./configs/gskeleton.yaml
+
+.PHONY: cli-create-user
+cli-create-user:
+	go run ./cmd/gskeleton cli create-user -config ./configs/gskeleton.yaml
 
 test:
 	go test -v ./...

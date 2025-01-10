@@ -11,7 +11,10 @@ type AppProvider struct {
 	Migrate *handler.Migrate
 }
 
-func Run(ctx *cliV2.Context, app *AppProvider) error {
-
+func RunMigrate(ctx *cliV2.Context, app *AppProvider) error {
 	return app.Migrate.Migrate(ctx.Context)
+}
+
+func RunCreateUser(ctx *cliV2.Context, app *AppProvider) error {
+	return app.Migrate.CreateUser(ctx.Context)
 }

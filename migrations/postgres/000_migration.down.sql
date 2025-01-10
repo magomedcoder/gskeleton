@@ -1,3 +1,1 @@
-drop database gskeleton;
-
-drop table users;
+DROP TABLE users;

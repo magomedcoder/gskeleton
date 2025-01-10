@@ -16,5 +16,12 @@ postgres:
 redis:
   host: redis:6379
 
+clickhouse:
+  host: clickhouse
+  port: 9000
+  username: clickhouse
+  password: clickhouse
+  database: gskeleton
+
 jwt:
   secret: "secret"
