@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/magomedcoder/gskeleton"
@@ -21,16 +22,45 @@ type Migrate struct {
 }
 
 func (m *Migrate) Migrate(ctx context.Context) error {
-	db, err := m.Db.DB()
+	postgres, err := sql.Open(
+		"postgres", fmt.Sprintf(
+			"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable TimeZone=Europe/Moscow",
+			m.Conf.Postgres.Host,
+			m.Conf.Postgres.Port,
+			m.Conf.Postgres.Username,
+			m.Conf.Postgres.Password,
+			m.Conf.Postgres.Database,
+		),
+	)
 	if err != nil {
 		log.Fatalf("Не удалось подключиться к базе данных: %v", err)
 	}
 
-	defer db.Close()
+	defer postgres.Close()
 
-	migrator := migrateutil.MustGetNewMigrator(gskeleton.Migration(), "migrations/postgres")
-	if err = migrator.ApplyMigrations(db); err != nil {
-		return errors.New(fmt.Sprintf("Ошибка при применении миграций: %v", err))
+	clickHouse, err := sql.Open(
+		"clickhouse",
+		fmt.Sprintf(
+			"clickhouse://%s:%s@%s:%d/%s",
+			m.Conf.ClickHouse.Username,
+			m.Conf.ClickHouse.Password,
+			m.Conf.ClickHouse.Host,
+			m.Conf.ClickHouse.Port,
+			m.Conf.ClickHouse.Database,
+		))
+	if err != nil {
+		log.Fatalf("не удалось подключиться к базе данных: %v", err)
+	}
+
+	defer clickHouse.Close()
+
+	migrator := migrateutil.NewMigrator(gskeleton.Migration())
+	if err := migrator.Postgres(postgres); err != nil {
+		return errors.New(fmt.Sprintf("Ошибка при применении миграций Postgres: %v", err))
+	}
+
+	if err := migrator.ClickHouse(clickHouse); err != nil {
+		return errors.New(fmt.Sprintf("Ошибка при применении миграций ClickHouse: %v", err))
 	}
 
 	return nil
