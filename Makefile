@@ -33,8 +33,10 @@ test:
 build:
 	go build -o ./build/gskeleton ./cmd/gskeleton
 
-.PHONY: proto
-proto:
+.PHONY: gen
+gen:
+	wire ./internal/app/di
+
 	protoc --proto_path=./api/grpc/proto \
 	   --go_out=paths=source_relative:./api/grpc/pb \
 	   --go-grpc_out=paths=source_relative:./api/grpc/pb \

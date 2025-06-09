@@ -1,4 +1,4 @@
-package provider
+package app
 
 import (
 	"log"
@@ -28,8 +28,10 @@ func NewApp(app *cliV2.App) *App {
 	}
 }
 
-func (a *App) Register(cm Command) {
-	a.app.Commands = append(a.app.Commands, a.createCommand(cm))
+func (a *App) Register(commands ...Command) {
+	for _, command := range commands {
+		a.app.Commands = append(a.app.Commands, a.createCommand(command))
+	}
 }
 
 func (a *App) createCommand(cm Command) *cliV2.Command {

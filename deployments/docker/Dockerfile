@@ -19,7 +19,7 @@ RUN mkdir /usr/src/gskeleton
 
 WORKDIR /usr/src/gskeleton
 
-COPY . ./
+COPY ../.. ./
 
 RUN make install
 

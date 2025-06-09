@@ -1,11 +1,11 @@
-package http
+package server
 
 import (
 	"context"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/magomedcoder/gskeleton/internal/config"
+	"github.com/magomedcoder/gskeleton/internal/app/di"
 	cliV2 "github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
 	"log"
@@ -16,12 +16,7 @@ import (
 	"time"
 )
 
-type AppProvider struct {
-	Conf   *config.Config
-	Engine *gin.Engine
-}
-
-func Run(ctx *cliV2.Context, app *AppProvider) error {
+func HTTP(ctx *cliV2.Context, app *di.HTTPProvider) error {
 	eg, groupCtx := errgroup.WithContext(context.Background())
 
 	gin.SetMode(gin.ReleaseMode)

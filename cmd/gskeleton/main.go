@@ -1,16 +1,16 @@
 package main
 
 import (
+	"github.com/magomedcoder/gskeleton/internal/app"
+	"github.com/magomedcoder/gskeleton/internal/app/di"
 	"github.com/magomedcoder/gskeleton/internal/cli"
 	"github.com/magomedcoder/gskeleton/internal/config"
-	"github.com/magomedcoder/gskeleton/internal/delivery/grpc"
-	"github.com/magomedcoder/gskeleton/internal/delivery/http"
-	"github.com/magomedcoder/gskeleton/internal/provider"
+	"github.com/magomedcoder/gskeleton/internal/server"
 	cliV2 "github.com/urfave/cli/v2"
 )
 
 func main() {
-	app := provider.NewApp(&cliV2.App{
+	_app := app.NewApp(&cliV2.App{
 		Name: "GSkeleton",
 		Flags: []cliV2.Flag{
 			&cliV2.StringFlag{
@@ -22,54 +22,48 @@ func main() {
 			},
 		},
 	})
-	app.Register(NewRunCommand())
-	app.Register(NewCliCommand())
-	app.Run()
-}
+	_app.Register(
+		app.Command{
+			Name:  "run",
+			Usage: "Run server",
 
-func NewRunCommand() provider.Command {
-	return provider.Command{
-		Name:  "run",
-		Usage: "Run server",
-
-		Subcommands: []provider.Command{
-			{
-				Name:  "http",
-				Usage: "Run http server",
-				Action: func(ctx *cliV2.Context, conf *config.Config) error {
-					return http.Run(ctx, NewHttpInjector(conf))
+			Subcommands: []app.Command{
+				{
+					Name:  "http",
+					Usage: "Run http server",
+					Action: func(ctx *cliV2.Context, conf *config.Config) error {
+						return server.HTTP(ctx, di.NewHttpInjector(conf))
+					},
 				},
-			},
-			{
-				Name:  "grpc",
-				Usage: "Run GRPC server",
-				Action: func(ctx *cliV2.Context, conf *config.Config) error {
-					return grpc.Run(ctx, NewGrpcInjector(conf))
+				{
+					Name:  "grpc",
+					Usage: "Run GRPC server",
+					Action: func(ctx *cliV2.Context, conf *config.Config) error {
+						return server.GRPC(ctx, di.NewGrpcInjector(conf))
+					},
 				},
 			},
 		},
-	}
-}
-
-func NewCliCommand() provider.Command {
-	return provider.Command{
-		Name:  "cli",
-		Usage: "Cli",
-		Subcommands: []provider.Command{
-			{
-				Name:  "migrate",
-				Usage: "Migrate",
-				Action: func(ctx *cliV2.Context, conf *config.Config) error {
-					return cli.RunMigrate(ctx, NewCliInjector(conf))
+		app.Command{
+			Name:  "cli",
+			Usage: "Cli",
+			Subcommands: []app.Command{
+				{
+					Name:  "migrate",
+					Usage: "Migrate",
+					Action: func(ctx *cliV2.Context, conf *config.Config) error {
+						return cli.RunMigrate(ctx, di.NewCliInjector(conf))
+					},
 				},
-			},
-			{
-				Name:  "create-user",
-				Usage: "Create user",
-				Action: func(ctx *cliV2.Context, conf *config.Config) error {
-					return cli.RunCreateUser(ctx, NewCliInjector(conf))
+				{
+					Name:  "create-user",
+					Usage: "Create user",
+					Action: func(ctx *cliV2.Context, conf *config.Config) error {
+						return cli.RunCreateUser(ctx, di.NewCliInjector(conf))
+					},
 				},
 			},
 		},
-	}
+	)
+	_app.Run()
 }

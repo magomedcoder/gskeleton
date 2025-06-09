@@ -1,20 +1,14 @@
 package cli
 
 import (
-	"github.com/magomedcoder/gskeleton/internal/cli/handler"
-	"github.com/magomedcoder/gskeleton/internal/config"
+	"github.com/magomedcoder/gskeleton/internal/app/di"
 	cliV2 "github.com/urfave/cli/v2"
 )
 
-type AppProvider struct {
-	Conf    *config.Config
-	Migrate *handler.Migrate
-}
-
-func RunMigrate(ctx *cliV2.Context, app *AppProvider) error {
+func RunMigrate(ctx *cliV2.Context, app *di.CLIProvider) error {
 	return app.Migrate.Migrate(ctx.Context)
 }
 
-func RunCreateUser(ctx *cliV2.Context, app *AppProvider) error {
+func RunCreateUser(ctx *cliV2.Context, app *di.CLIProvider) error {
 	return app.Migrate.CreateUser(ctx.Context)
 }

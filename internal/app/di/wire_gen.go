@@ -4,18 +4,15 @@
 //go:build !wireinject
 // +build !wireinject
 
-package main
+package di
 
 import (
 	"github.com/google/wire"
 	"github.com/magomedcoder/gskeleton/api/grpc/pb"
-	"github.com/magomedcoder/gskeleton/internal/cli"
 	handler3 "github.com/magomedcoder/gskeleton/internal/cli/handler"
 	"github.com/magomedcoder/gskeleton/internal/config"
-	"github.com/magomedcoder/gskeleton/internal/delivery/grpc"
 	handler2 "github.com/magomedcoder/gskeleton/internal/delivery/grpc/handler"
 	middleware2 "github.com/magomedcoder/gskeleton/internal/delivery/grpc/middleware"
-	"github.com/magomedcoder/gskeleton/internal/delivery/http"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/handler"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/handler/v1"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/handler/v2"
@@ -30,7 +27,7 @@ import (
 
 // Injectors from wire.go:
 
-func NewHttpInjector(conf *config.Config) *http.AppProvider {
+func NewHttpInjector(conf *config.Config) *HTTPProvider {
 	db := provider.NewPostgresClient(conf)
 	userRepository := repository.NewUserRepository(db)
 	client := provider.NewRedisClient(conf)
@@ -59,14 +56,14 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		AuthMiddleware: authMiddleware,
 	}
 	engine := router.NewRouter(handlerHandler, middlewareMiddleware)
-	appProvider := &http.AppProvider{
+	httpProvider := &HTTPProvider{
 		Conf:   conf,
 		Engine: engine,
 	}
-	return appProvider
+	return httpProvider
 }
 
-func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
+func NewGrpcInjector(conf *config.Config) *GRPCProvider {
 	tokenMiddleware := middleware2.NewTokenMiddleware(conf)
 	grpcMethodService := middleware2.NewGrpMethodsService()
 	unimplementedAuthServiceServer := pb.UnimplementedAuthServiceServer{}
@@ -92,17 +89,17 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 		UserUseCase:                    userUseCase,
 		TokenMiddleware:                tokenMiddleware,
 	}
-	appProvider := &grpc.AppProvider{
+	grpcProvider := &GRPCProvider{
 		Conf:            conf,
 		TokenMiddleware: tokenMiddleware,
 		RoutesServices:  grpcMethodService,
 		AuthHandler:     authHandler,
 		UserHandler:     userHandler,
 	}
-	return appProvider
+	return grpcProvider
 }
 
-func NewCliInjector(conf *config.Config) *cli.AppProvider {
+func NewCliInjector(conf *config.Config) *CLIProvider {
 	db := provider.NewPostgresClient(conf)
 	userRepository := repository.NewUserRepository(db)
 	client := provider.NewRedisClient(conf)
@@ -119,11 +116,11 @@ func NewCliInjector(conf *config.Config) *cli.AppProvider {
 		Db:          db,
 		UserUseCase: userUseCase,
 	}
-	appProvider := &cli.AppProvider{
+	cliProvider := &CLIProvider{
 		Conf:    conf,
 		Migrate: migrate,
 	}
-	return appProvider
+	return cliProvider
 }
 
 // wire.go:
