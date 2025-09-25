@@ -58,7 +58,7 @@ services:
 
   clickhouse:
     container_name: clickhouse
-    image: clickhouse/clickhouse-server:24.8
+    image: clickhouse/clickhouse-server:25.8
     environment:
       - CLICKHOUSE_USER=clickhouse
       - CLICKHOUSE_PASSWORD=clickhouse

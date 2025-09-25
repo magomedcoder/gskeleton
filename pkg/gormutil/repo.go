@@ -61,7 +61,24 @@ func (r *Repo[T]) SelectFindByWhere(ctx context.Context, sel string, where strin
 	return item, nil
 }
 
+func (r *Repo[T]) CreateInBatches(ctx context.Context, item []T, batchSize int) error {
+	return r.Db.WithContext(ctx).CreateInBatches(item, batchSize).Error
+}
+
 func (r *Repo[T]) FindAll(ctx context.Context, arg ...func(*gorm.DB)) ([]*T, error) {
+	bd := r.Model(ctx)
+	for _, fn := range arg {
+		fn(bd)
+	}
+	var items []*T
+	if err := bd.Find(&items).Error; err != nil {
+		return nil, err
+	}
+
+	return items, nil
+}
+
+func (r *Repo[T]) ScanAll(ctx context.Context, arg ...func(*gorm.DB)) ([]*T, error) {
 	bd := r.Model(ctx)
 	for _, fn := range arg {
 		fn(bd)
@@ -117,6 +134,19 @@ func (r *Repo[T]) FindCustom(ctx context.Context, arg ...func(*gorm.DB)) (*T, er
 	return item, nil
 }
 
+func (r *Repo[T]) FindByWhereWithQuery(ctx context.Context, where string, args []any, opts ...func(*gorm.DB)) (*T, error) {
+	var item T
+	db := r.Db.WithContext(ctx).Model(&item).Where(where, args...)
+	for _, opt := range opts {
+		opt(db)
+	}
+	if err := db.First(&item).Error; err != nil {
+		return nil, err
+	}
+
+	return &item, nil
+}
+
 func (r *Repo[T]) QueryCount(ctx context.Context, where string, args ...any) (int64, error) {
 	var count int64
 	if err := r.Model(ctx).Where(where, args...).Count(&count).Error; err != nil {
@@ -137,6 +167,12 @@ func (r *Repo[T]) QueryExist(ctx context.Context, where string, args ...any) (bo
 
 func (r *Repo[T]) UpdateById(ctx context.Context, id any, data map[string]any) (int64, error) {
 	res := r.Model(ctx).Where("id = ?", id).Updates(data)
+
+	return res.RowsAffected, res.Error
+}
+
+func (r *Repo[T]) UpdateColumnById(ctx context.Context, id any, column string, value interface{}) (int64, error) {
+	res := r.Model(context.Background()).Where("id = ?", id).UpdateColumn(column, value)
 
 	return res.RowsAffected, res.Error
 }
