@@ -1,6 +1,8 @@
 .PHONY: install-ubuntu
 install-ubuntu:
-	apt install -y protobuf-compiler
+	curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v30.2/protoc-30.2-linux-x86_64.zip
+	unzip protoc-30.2-linux-x86_64.zip -d $HOME/.local
+	export PATH="$PATH:$HOME/.local/bin"
 	protoc --version
 
 .PHONY: install

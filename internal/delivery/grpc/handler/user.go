@@ -12,14 +12,21 @@ import (
 	"time"
 )
 
-type UserHandler struct {
-	pb.UnimplementedUserServiceServer
+type UserOption struct {
 	UserUseCase     usecase.IUserUseCase
 	TokenMiddleware *middleware.TokenMiddleware
 }
 
+type UserHandler struct {
+	pb.UnimplementedUserServiceServer
+	opts UserOption
+}
+
+func NewUserHandler(opts UserOption) *UserHandler {
+	return &UserHandler{opts: opts}
+}
 func (u *UserHandler) Get(ctx context.Context, in *pb.Get_Request) (*pb.Get_Response, error) {
-	user, _ := u.UserUseCase.GetUserByUsername(ctx, in.Username)
+	user, _ := u.opts.UserUseCase.GetUserByUsername(ctx, in.Username)
 	if user.Id == 0 {
 		return nil, status.Error(codes.NotFound, "Пользователь не найден")
 	}
@@ -37,7 +44,7 @@ func (u *UserHandler) HashPassword(password string) (string, error) {
 }
 
 func (u *UserHandler) Create(ctx context.Context, in *pb.Create_Request) (*pb.Create_Response, error) {
-	passwordHash, err := u.UserUseCase.HashPassword(in.Password)
+	passwordHash, err := u.opts.UserUseCase.HashPassword(in.Password)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Не удалось хешировать пароль")
 	}
@@ -48,7 +55,7 @@ func (u *UserHandler) Create(ctx context.Context, in *pb.Create_Request) (*pb.Cr
 		CreatedAt: time.Now(),
 	}
 
-	if _, err = u.UserUseCase.Create(ctx, &user); err != nil {
+	if _, err = u.opts.UserUseCase.Create(ctx, &user); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 

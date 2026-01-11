@@ -10,23 +10,31 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+type AuthOption struct {
+	UserUseCase     usecase.IUserUseCase
+	TokenMiddleware *middleware.TokenMiddleware
+}
+
 type AuthHandler struct {
 	pb.UnimplementedAuthServiceServer
-	TokenMiddleware *middleware.TokenMiddleware
-	UserUseCase     usecase.IUserUseCase
+	opts AuthOption
+}
+
+func NewAuthHandler(opts AuthOption) *AuthHandler {
+	return &AuthHandler{opts: opts}
 }
 
 func (a *AuthHandler) Login(ctx context.Context, in *pb.Login_Request) (*pb.Login_Response, error) {
-	user, err := a.UserUseCase.GetUserByUsername(ctx, in.Username)
+	user, err := a.opts.UserUseCase.GetUserByUsername(ctx, in.Username)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "Пользователь не найден")
 	}
 
-	if _, err := a.UserUseCase.CheckPasswordHash(in.Password, user.Password); err != nil {
+	if _, err := a.opts.UserUseCase.CheckPasswordHash(in.Password, user.Password); err != nil {
 		return nil, status.Error(codes.Unauthenticated, "Неверный пароль")
 	}
 
-	token, err := a.TokenMiddleware.CreateToken(user)
+	token, err := a.opts.TokenMiddleware.CreateToken(user)
 	if err != nil {
 		grpclog.Errorf("Ошибка создания токена: %v", err)
 		return nil, status.Error(codes.FailedPrecondition, "ошибка создания токена")

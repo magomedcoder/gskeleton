@@ -10,14 +10,12 @@ import (
 	postgresModel "github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/model"
 	"github.com/magomedcoder/gskeleton/internal/usecase"
 	"github.com/magomedcoder/gskeleton/pkg/migrateutil"
-	"gorm.io/gorm"
 	"log"
 	"time"
 )
 
 type Migrate struct {
 	Conf        *config.Config
-	Db          *gorm.DB
 	UserUseCase usecase.IUserUseCase
 }
 
