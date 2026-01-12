@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator"
@@ -25,9 +23,8 @@ func (c *Context) Ctx() context.Context {
 	return c.Context.Request.Context()
 }
 
-func (c *Context) Success(data any, message ...string) error {
+func (c *Context) Success(code int, data any, message ...string) error {
 	resp := &Response{
-		Code:    200,
 		Message: "success",
 		Data:    data,
 	}
@@ -42,14 +39,13 @@ func (c *Context) Success(data any, message ...string) error {
 		resp.Data = body
 	}
 
-	c.Context.AbortWithStatusJSON(http.StatusOK, resp)
+	c.Context.AbortWithStatusJSON(code, resp)
 
 	return nil
 }
 
-func (c *Context) InvalidParams(message any) error {
+func (c *Context) InvalidParams(code int, message any) error {
 	resp := &Response{
-		Code:    305,
 		Message: "Invalid parameters",
 	}
 	switch msg := message.(type) {
@@ -61,14 +57,13 @@ func (c *Context) InvalidParams(message any) error {
 		resp.Message = fmt.Sprintf("%v", msg)
 	}
 
-	c.Context.AbortWithStatusJSON(http.StatusBadRequest, resp)
+	c.Context.AbortWithStatusJSON(code, resp)
 
 	return nil
 }
 
-func (c *Context) Error(message any) error {
+func (c *Context) Error(code int, message any) error {
 	resp := &Response{
-		Code:    400,
 		Message: "error",
 	}
 	switch msg := message.(type) {
@@ -80,7 +75,7 @@ func (c *Context) Error(message any) error {
 		resp.Message = fmt.Sprintf("%v", msg)
 	}
 
-	c.Context.AbortWithStatusJSON(http.StatusBadRequest, resp)
+	c.Context.AbortWithStatusJSON(code, resp)
 
 	return nil
 }

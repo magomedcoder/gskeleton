@@ -3,18 +3,15 @@ package handler
 import (
 	"context"
 	"github.com/magomedcoder/gskeleton/api/grpc/pb"
-	"github.com/magomedcoder/gskeleton/internal/delivery/grpc/middleware"
-	postgresModel "github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/model"
+	"github.com/magomedcoder/gskeleton/internal/domain/entity"
 	"github.com/magomedcoder/gskeleton/internal/usecase"
-	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"time"
+	"log"
 )
 
 type UserOption struct {
-	UserUseCase     usecase.IUserUseCase
-	TokenMiddleware *middleware.TokenMiddleware
+	UserUseCase usecase.IUserUseCase
 }
 
 type UserHandler struct {
@@ -25,41 +22,34 @@ type UserHandler struct {
 func NewUserHandler(opts UserOption) *UserHandler {
 	return &UserHandler{opts: opts}
 }
-func (u *UserHandler) Get(ctx context.Context, in *pb.Get_Request) (*pb.Get_Response, error) {
-	user, _ := u.opts.UserUseCase.GetUserByUsername(ctx, in.Username)
-	if user.Id == 0 {
-		return nil, status.Error(codes.NotFound, "Пользователь не найден")
+
+func (u *UserHandler) CreateUser(ctx context.Context, in *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
+	user := &entity.UserOpt{
+		Username: in.Username,
+		Password: in.Password,
 	}
 
-	return &pb.Get_Response{
-		Username: user.Username,
-		Id:       user.Id,
-		CreateAt: user.CreatedAt.Local().String(),
+	userModel, err := u.opts.UserUseCase.Create(ctx, user)
+	if err != nil {
+		log.Printf("Ошибка создания пользователя: %v", err)
+		return nil, status.Error(codes.FailedPrecondition, "Ошибка создания пользователя")
+	}
+
+	return &pb.CreateUserResponse{
+		Id: userModel.Id,
 	}, nil
 }
 
-func (u *UserHandler) HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	return string(bytes), err
-}
-
-func (u *UserHandler) Create(ctx context.Context, in *pb.Create_Request) (*pb.Create_Response, error) {
-	passwordHash, err := u.opts.UserUseCase.HashPassword(in.Password)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "Не удалось хешировать пароль")
+func (u *UserHandler) GetUser(ctx context.Context, in *pb.GetUserRequest) (*pb.GetUserResponse, error) {
+	user, _ := u.opts.UserUseCase.GetUserById(ctx, in.Id)
+	if user.Id == 0 {
+		log.Printf("Пользователь не найден: %v", in.Id)
+		return nil, status.Error(codes.NotFound, "Пользователь не найден")
 	}
 
-	user := postgresModel.User{
-		Username:  in.Username,
-		Password:  passwordHash,
-		CreatedAt: time.Now(),
-	}
-
-	if _, err = u.opts.UserUseCase.Create(ctx, &user); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	return &pb.Create_Response{
-		Success: true,
+	return &pb.GetUserResponse{
+		Id:       user.Id,
+		Username: user.Username,
+		CreateAt: user.CreatedAt.Unix(),
 	}, nil
 }

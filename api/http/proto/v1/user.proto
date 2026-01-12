@@ -6,25 +6,29 @@ import "tagger/tagger.proto";
 
 option go_package = "github.com/magomedcoder/gskeleton/api/http/pb/v1";
 
+message User {
+    int64 id = 1 [(tagger.tags) = "json:\"id\""];
+    string username = 2 [(tagger.tags) = "json:\"username\""];
+    string name = 3 [(tagger.tags) = "json:\"name\""];
+}
+
 message CreateUserRequest {
     string username = 1 [(tagger.tags) = "form:\"username\" json:\"username\" binding:\"required,min=3\" label:\"username\""];
     string password = 2 [(tagger.tags) = "form:\"password\" json:\"password\" binding:\"required,min=8\" label:\"password\""];
     string name = 3 [(tagger.tags) = "form:\"name\" json:\"name\" binding:\"required,min=2\" label:\"name\""];
 }
 
-message GetUserResponse {
+message CreateUserResponse {
     int64 id = 1 [(tagger.tags) = "json:\"id\""];
-    string username = 2 [(tagger.tags) = "json:\"username\""];
-    string name = 3 [(tagger.tags) = "json:\"name\""];
-}
-
-message UserItem {
-    int64 id = 1 [(tagger.tags) = "json:\"id\""];
-    string username = 2 [(tagger.tags) = "json:\"username\""];
-    string name = 3 [(tagger.tags) = "json:\"name\""];
 }
 
 message GetUsersResponse {
     int64 total = 1 [(tagger.tags) = "json:\"total\""];
-    repeated UserItem items = 2 [(tagger.tags) = "json:\"items\""];
+    repeated User items = 2 [(tagger.tags) = "json:\"items\""];
+}
+
+message GetUserResponse {
+    int64 id = 1 [(tagger.tags) = "json:\"id\""];
+    string username = 2 [(tagger.tags) = "json:\"username\""];
+    string name = 3 [(tagger.tags) = "json:\"name\""];
 }

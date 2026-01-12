@@ -3,15 +3,31 @@ package middleware
 import (
 	"context"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/grpclog"
+	"log"
 	"time"
 )
 
-func LoggingServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+type LoggingMiddleware struct {
+}
+
+func NewLoggingMiddleware() *LoggingMiddleware {
+	return &LoggingMiddleware{}
+}
+
+func (l *LoggingMiddleware) UnaryLoggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	start := time.Now()
 	h, err := handler(ctx, req)
 
-	grpclog.Infof("Запрос - Метод: %s \t Длительность:%s \t Ошибка:%v \n", info.FullMethod, time.Since(start), err)
+	log.Printf("Request - Method: %s \t Duration: %s \t Error: %v \n", info.FullMethod, time.Since(start), err)
 
 	return h, err
+}
+
+func (l *LoggingMiddleware) StreamLoggingInterceptor(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+	start := time.Now()
+	err := handler(srv, ss)
+
+	log.Printf("Stream - Method: %s \t Duration: %s \t Error: %v \n", info.FullMethod, time.Since(start), err)
+
+	return err
 }

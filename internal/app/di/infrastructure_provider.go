@@ -7,19 +7,22 @@ import (
 )
 
 type InfrastructureProvider struct {
-	UserCacheRepository *redisRepo.UserCacheRepository
-	UserRepository      *postgresRepo.UserRepository
-	UserLogRepository   *clickhouseRepo.UserLogRepository
+	UserRepository          *postgresRepo.UserRepository
+	UserCacheRepository     *redisRepo.UserCacheRepository
+	JwtTokenCacheRepository *redisRepo.JwtTokenCacheRepository
+	UserLogRepository       *clickhouseRepo.UserLogRepository
 }
 
 func NewInfrastructureProvider(provider *Provider) *InfrastructureProvider {
-	userCacheRepository := redisRepo.NewUserCacheRepository(provider.Redis)
 	userRepository := postgresRepo.NewUserRepository(provider.Postgres)
+	userCacheRepository := redisRepo.NewUserCacheRepository(provider.Redis)
+	jwtTokenCacheRepository := redisRepo.NewJwtTokenCacheRepository(provider.Redis)
 	userLogRepository := clickhouseRepo.NewUserLogRepository(provider.ClickHouse)
 
 	return &InfrastructureProvider{
-		UserCacheRepository: userCacheRepository,
-		UserRepository:      userRepository,
-		UserLogRepository:   userLogRepository,
+		UserRepository:          userRepository,
+		UserCacheRepository:     userCacheRepository,
+		JwtTokenCacheRepository: jwtTokenCacheRepository,
+		UserLogRepository:       userLogRepository,
 	}
 }

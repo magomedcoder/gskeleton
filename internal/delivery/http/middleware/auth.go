@@ -20,7 +20,6 @@ func (a *AuthMiddleware) Auth() gin.HandlerFunc {
 		token := AuthHeaderToken(ctx)
 		if token == "" {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, &ginutil.Response{
-				Code:    http.StatusUnauthorized,
 				Message: "Невалидный токен",
 			})
 			return

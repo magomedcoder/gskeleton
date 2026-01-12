@@ -54,7 +54,7 @@ func (m *Migrator) Postgres(db *sql.DB) error {
 		return fmt.Errorf("не удалось создать экземпляр базы данных: %v", err)
 	}
 
-	d, err := iofs.New(m.Migration, "migrations/postgresql")
+	d, err := iofs.New(m.Migration, "migrations/postgres")
 	if err != nil {
 		return fmt.Errorf("не удалось загрузить миграции: %v", err)
 	}

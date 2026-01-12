@@ -5,7 +5,6 @@ import (
 	"github.com/magomedcoder/gskeleton/internal/config"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/handler"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/handler/v1"
-	"github.com/magomedcoder/gskeleton/internal/delivery/http/handler/v2"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/middleware"
 	"github.com/magomedcoder/gskeleton/internal/delivery/http/router"
 )
@@ -26,14 +25,10 @@ func NewHttpInjector(conf *config.Config) *HTTPProvider {
 	}
 
 	user := v1.NewUserHandler(useCases.UserUseCase)
-	v2User := v2.NewUserHandler(useCases.UserUseCase)
 
 	handlerHandler := &handler.Handler{
 		V1: &v1.V1{
 			User: user,
-		},
-		V2: &v2.V2{
-			User: v2User,
 		},
 	}
 

@@ -45,5 +45,4 @@ gen:
 	  --proto_path=./third_party/proto/ \
 	  --go_out=paths=source_relative:./api/http/pb \
 	  --validate_out=paths=source_relative,lang=go:./api/http/pb/ \
-	  ./api/http/proto/v1/*.proto \
-	  ./api/http/proto/v2/*.proto
+	  ./api/http/proto/v1/*.proto

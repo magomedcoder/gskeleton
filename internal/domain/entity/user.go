@@ -5,3 +5,8 @@ type User struct {
 	Username string
 	Name     string
 }
+
+type UserOpt struct {
+	Username string
+	Password string
+}

@@ -25,3 +25,4 @@ clickhouse:
 
 jwt:
   secret: "secret"
+  expires_time: 2678400

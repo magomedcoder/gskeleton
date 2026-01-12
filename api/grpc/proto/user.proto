@@ -5,30 +5,25 @@ package gskeleton.grpc.user;
 option go_package = "github.com/magomedcoder/gskeleton/api/grpc/pb";
 
 service UserService {
-    rpc Create(Create.Request) returns (Create.Response) {}
-    rpc Get(Get.Request) returns (Get.Response) {}
+    rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+
+    rpc GetUser(GetUserRequest) returns (GetUserResponse);
+}
+message CreateUserRequest {
+    string username = 1;
+    string password = 2;
 }
 
-message Create {
-    message Request {
-        string username = 1;
-        string password = 2;
-    }
-
-    message Response {
-        int64 id = 1;
-        bool success = 2;
-    }
+message CreateUserResponse {
+    int64 id = 1;
 }
 
-message Get {
-    message Request {
-        string username = 1;
-    }
+message GetUserRequest {
+    int64 id = 1;
+}
 
-    message Response {
-        int64 id = 1;
-        string username = 2;
-        string createAt = 3;
-    }
+message GetUserResponse {
+    int64 id = 1;
+    string username = 2;
+    int64 createAt = 3;
 }

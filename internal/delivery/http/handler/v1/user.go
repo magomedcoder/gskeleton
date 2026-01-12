@@ -2,13 +2,14 @@ package v1
 
 import (
 	v1Pb "github.com/magomedcoder/gskeleton/api/http/pb/v1"
-	postgresModel "github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/model"
+	"github.com/magomedcoder/gskeleton/internal/domain/entity"
 	"github.com/magomedcoder/gskeleton/internal/usecase"
 	"github.com/magomedcoder/gskeleton/pkg/ginutil"
 	"github.com/magomedcoder/gskeleton/pkg/gormutil"
 	"gorm.io/gorm"
+	"log"
+	"net/http"
 	"strconv"
-	"time"
 )
 
 type User struct {
@@ -23,43 +24,37 @@ func NewUserHandler(
 	}
 }
 
-func (u *User) Create(ctx *ginutil.Context) error {
+func (u *User) CreateUser(ctx *ginutil.Context) error {
 	params := &v1Pb.CreateUserRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
-		return ctx.InvalidParams(err)
+		return ctx.InvalidParams(http.StatusBadRequest, err)
 	}
 
-	passwordHash, err := u.UserUseCase.HashPassword(params.Password)
+	user := &entity.UserOpt{
+		Username: params.Username,
+		Password: params.Password,
+	}
+
+	userModel, err := u.UserUseCase.Create(ctx.Ctx(), user)
 	if err != nil {
-		return ctx.Error("Не удалось хешировать пароль")
+		log.Printf("Ошибка создания пользователя: %v", err)
+		return ctx.Error(http.StatusBadRequest, "Ошибка создания пользователя")
 	}
 
-	user := postgresModel.User{
-		Username:  params.Username,
-		Password:  passwordHash,
-		CreatedAt: time.Now(),
-	}
-
-	if _, err = u.UserUseCase.Create(ctx.Ctx(), &user); err != nil {
-		return ctx.Error(err.Error())
-	}
-
-	return ctx.Success(&v1Pb.GetUserResponse{
-		Id:       user.Id,
-		Username: user.Username,
-		Name:     user.Name,
+	return ctx.Success(http.StatusOK, &v1Pb.CreateUserResponse{
+		Id: userModel.Id,
 	})
 }
 
-func (u *User) List(ctx *ginutil.Context) error {
+func (u *User) GetUsers(ctx *ginutil.Context) error {
 	page, err := strconv.Atoi(ctx.Context.DefaultQuery("page", "1"))
 	if err != nil {
-		return ctx.Error("Неверный номер страницы")
+		return ctx.Error(http.StatusBadRequest, "Неверный номер страницы")
 	}
 
 	pageSize, err := strconv.Atoi(ctx.Context.DefaultQuery("pageSize", "15"))
 	if err != nil {
-		return ctx.Error("Неверный размер страницы")
+		return ctx.Error(http.StatusBadRequest, "Неверный размер страницы")
 	}
 
 	pagination := &gormutil.Pagination{}
@@ -71,36 +66,36 @@ func (u *User) List(ctx *ginutil.Context) error {
 		db.Scopes(gormutil.Paginate(pagination)).Count(&count)
 	})
 	if err != nil {
-		return ctx.Error("Пользователи не найдены")
+		return ctx.Error(http.StatusBadRequest, "Пользователи не найдены")
 	}
 
-	items := make([]*v1Pb.UserItem, 0)
+	items := make([]*v1Pb.User, 0)
 	for _, item := range users {
-		items = append(items, &v1Pb.UserItem{
+		items = append(items, &v1Pb.User{
 			Id:       item.Id,
 			Username: item.Username,
 			Name:     item.Name,
 		})
 	}
 
-	return ctx.Success(&v1Pb.GetUsersResponse{
+	return ctx.Success(http.StatusOK, &v1Pb.GetUsersResponse{
 		Total: count,
 		Items: items,
 	})
 }
 
-func (u *User) Get(ctx *ginutil.Context) error {
+func (u *User) GetUser(ctx *ginutil.Context) error {
 	id, err := strconv.ParseInt(ctx.Context.Param("id"), 10, 64)
 	if err != nil {
-		return ctx.Error("Неверный id")
+		return ctx.Error(http.StatusBadRequest, "Неверный id")
 	}
 
 	user, _ := u.UserUseCase.GetUserById(ctx.Ctx(), id)
 	if user.Id == 0 {
-		return ctx.Error("Пользователь не найден")
+		return ctx.Error(http.StatusBadRequest, "Пользователь не найден")
 	}
 
-	return ctx.Success(&v1Pb.GetUserResponse{
+	return ctx.Success(http.StatusOK, &v1Pb.GetUserResponse{
 		Id:       user.Id,
 		Username: user.Username,
 		Name:     user.Name,

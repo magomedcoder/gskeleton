@@ -26,7 +26,6 @@ func main() {
 		app.Command{
 			Name:  "run",
 			Usage: "Run server",
-
 			Subcommands: []app.Command{
 				{
 					Name:  "http",

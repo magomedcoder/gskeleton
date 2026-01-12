@@ -23,7 +23,7 @@ func TestAuthLoginService(t *testing.T) {
 	defer conn.Close()
 
 	client := pb.NewAuthServiceClient(conn)
-	res, err := client.Login(ctx, &pb.Login_Request{
+	res, err := client.Login(ctx, &pb.LoginRequest{
 		Username: "test",
 		Password: "test",
 	})

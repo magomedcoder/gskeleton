@@ -7,11 +7,10 @@ import (
 	"fmt"
 	"github.com/magomedcoder/gskeleton"
 	"github.com/magomedcoder/gskeleton/internal/config"
-	postgresModel "github.com/magomedcoder/gskeleton/internal/infrastructure/postgres/model"
+	"github.com/magomedcoder/gskeleton/internal/domain/entity"
 	"github.com/magomedcoder/gskeleton/internal/usecase"
 	"github.com/magomedcoder/gskeleton/pkg/migrateutil"
 	"log"
-	"time"
 )
 
 type Migrate struct {
@@ -65,10 +64,9 @@ func (m *Migrate) Migrate(ctx context.Context) error {
 }
 
 func (m *Migrate) CreateUser(ctx context.Context) error {
-	if _, err := m.UserUseCase.Create(ctx, &postgresModel.User{
-		Username:  "admin",
-		Password:  "admin123",
-		CreatedAt: time.Now(),
+	if _, err := m.UserUseCase.Create(ctx, &entity.UserOpt{
+		Username: "admin",
+		Password: "admin123",
 	}); err != nil {
 		return err
 	}

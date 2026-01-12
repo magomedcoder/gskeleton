@@ -7,11 +7,10 @@ import (
 )
 
 type GRPCProvider struct {
-	Conf            *config.Config
-	TokenMiddleware *middleware.TokenMiddleware
-	RoutesServices  *middleware.GrpcMethodService
-	AuthHandler     *handler.AuthHandler
-	UserHandler     *handler.UserHandler
+	Conf        *config.Config
+	Middleware  middleware.Middleware
+	AuthHandler *handler.AuthHandler
+	UserHandler *handler.UserHandler
 }
 
 func NewGrpcInjector(conf *config.Config) *GRPCProvider {
@@ -19,27 +18,29 @@ func NewGrpcInjector(conf *config.Config) *GRPCProvider {
 	infra := NewInfrastructureProvider(provider)
 	useCases := NewUseCaseProvider(infra)
 
-	tokenMiddleware := middleware.NewTokenMiddleware(conf)
-	grpcMethodService := middleware.NewGrpMethodsService()
+	authMiddleware := middleware.NewAuthMiddleware(conf, useCases.UserUseCase)
+	loggingMiddleware := middleware.NewLoggingMiddleware()
+
+	middlewareMiddleware := middleware.Middleware{
+		Auth:    authMiddleware,
+		Logging: loggingMiddleware,
+	}
 
 	authOption := handler.AuthOption{
-		TokenMiddleware: tokenMiddleware,
-		UserUseCase:     useCases.UserUseCase,
+		UserUseCase: useCases.UserUseCase,
 	}
 
 	userOption := handler.UserOption{
-		UserUseCase:     useCases.UserUseCase,
-		TokenMiddleware: tokenMiddleware,
+		UserUseCase: useCases.UserUseCase,
 	}
 
 	authHandler := handler.NewAuthHandler(authOption)
 	userHandler := handler.NewUserHandler(userOption)
 
 	return &GRPCProvider{
-		Conf:            conf,
-		TokenMiddleware: tokenMiddleware,
-		RoutesServices:  grpcMethodService,
-		AuthHandler:     authHandler,
-		UserHandler:     userHandler,
+		Conf:        conf,
+		Middleware:  middlewareMiddleware,
+		AuthHandler: authHandler,
+		UserHandler: userHandler,
 	}
 }

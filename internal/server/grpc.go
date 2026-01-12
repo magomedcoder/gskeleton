@@ -3,10 +3,8 @@ package server
 import (
 	"context"
 	"fmt"
-	grpcMiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/magomedcoder/gskeleton/api/grpc/pb"
 	"github.com/magomedcoder/gskeleton/internal/app/di"
-	"github.com/magomedcoder/gskeleton/internal/delivery/grpc/middleware"
 	cliV2 "github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
@@ -19,9 +17,6 @@ import (
 
 func GRPC(ctx2 *cliV2.Context, app *di.GRPCProvider) error {
 	ctx := context.Background()
-
-	ctx = middleware.RegisterGlobalService(ctx, app.TokenMiddleware)
-	ctx = middleware.RegisterGlobalService(ctx, app.RoutesServices)
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -44,10 +39,16 @@ func GRPC(ctx2 *cliV2.Context, app *di.GRPCProvider) error {
 
 		grpclog.SetLoggerV2(grpclog.NewLoggerV2(os.Stdout, os.Stderr, os.Stderr))
 
-		srv := grpc.NewServer(grpc.UnaryInterceptor(grpcMiddleware.ChainUnaryServer(
-			middleware.LoggingServerInterceptor,
-			middleware.AuthorizationServerInterceptor,
-		)))
+		srv := grpc.NewServer(
+			grpc.ChainUnaryInterceptor(
+				app.Middleware.Logging.UnaryLoggingInterceptor,
+				app.Middleware.Auth.UnaryAuthInterceptor,
+			),
+			grpc.ChainStreamInterceptor(
+				app.Middleware.Logging.StreamLoggingInterceptor,
+				app.Middleware.Auth.StreamAuthInterceptor,
+			),
+		)
 
 		pb.RegisterAuthServiceServer(srv, app.AuthHandler)
 		pb.RegisterUserServiceServer(srv, app.UserHandler)
