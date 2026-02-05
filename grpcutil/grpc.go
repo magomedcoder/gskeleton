@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/magomedcoder/gskeleton/pkg/jwtutil"
+	"github.com/magomedcoder/gutil/jwtutil"
 	"strings"
 
 	"google.golang.org/grpc/metadata"

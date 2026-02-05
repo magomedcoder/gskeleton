@@ -1,16 +1,13 @@
-# Go Clean Architecture Template
+## GUtil
 
-## Overview
+A set of helper utilities for Go services.
 
-This repository provides a basic folder structure for developing applications in Go using Clean Architecture principles.
-By following this structure, you can focus on building your application without spending time on organizing folders and
-files.
+The repository contains small, reusable wrappers and helpers for common tasks.
 
-## Why Clean Architecture?
+```bash
+go get github.com/magomedcoder/gutil
 
-Clean Architecture helps separate concerns within your application, making the codebase more modular, testable, and
-maintainable. The key benefits include:
-
-- **Independence**: Core business logic is separated from external dependencies and frameworks.
-- **Testability**: Each component can be tested independently, making unit and integration testing more straightforward.
-- **Flexibility**: You can easily replace or modify components without affecting the entire application.
+import (
+    "github.com/magomedcoder/gutil/ginutil"
+    "github.com/magomedcoder/gutil/jwtutil"
+)

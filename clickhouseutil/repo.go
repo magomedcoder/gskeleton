@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	clickHouseDriver "github.com/ClickHouse/clickhouse-go/v2/lib/driver"
-	"github.com/magomedcoder/gskeleton/pkg"
 	"reflect"
 	"strings"
 )
@@ -51,7 +50,7 @@ func (r *Repo[T]) Create(ctx context.Context, model ITable) error {
 
 		value := v.Field(i).Interface()
 
-		if pkg.IsZeroValue(v.Field(i)) {
+		if IsZeroValue(v.Field(i)) {
 			values = append(values, nil)
 		} else {
 			values = append(values, value)
